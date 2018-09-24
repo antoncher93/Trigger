@@ -51,7 +51,7 @@ namespace Trigger.Telemetry
             }
         }
 
-        public Telemetry EmptyForUser(string userId)
+        public static Telemetry EmptyForUser(string userId)
         {
             return new Telemetry
             {
