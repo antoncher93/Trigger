@@ -50,6 +50,41 @@ namespace Trigger.Telemetry
                 }
             }
         }
+
+        public Telemetry EmptyForUser(string userId)
+        {
+            return new Telemetry
+            {
+                Type = 1,
+                Data = new TelemetryData
+                {
+                    UserId = userId,
+                    APoints = new List<APoint>()
+                }
+            };
+        }
+
+        public void NewBeacon(string mac, int rssi, string apointUid, DateTime time)
+        {
+            var apoint = Data.APoints.FirstOrDefault(ap => ap.Uid == apointUid);
+            if(apoint == null)
+            {
+                apoint = APoint.FromParse(apointUid);
+                Data.APoints.Add(apoint);
+            }
+
+            var beacon = apoint.Beacons.FirstOrDefault(b => b.Mac == mac);
+            if(beacon == null)
+            {
+                beacon = SingleBeaconTelemetry.FromParse(mac);
+                apoint.Beacons.Add(beacon);
+            }
+            var rssivalue = beacon.Values.FirstOrDefault(v => v.Time == time);
+            if(rssivalue == null)
+            {
+                rssivalue = new RssiValue { Rssi = rssi, Time = time };
+            }
+        }
     }
 
     public class TelemetryData// : ITelemetryData
@@ -79,6 +114,15 @@ namespace Trigger.Telemetry
     {
         public string Mac { get; set; }
         public IList<RssiValue> Values { get; set; }
+
+        public static SingleBeaconTelemetry FromParse(string mac)
+        {
+            return new SingleBeaconTelemetry
+            {
+                Mac = mac,
+                Values = new List<RssiValue>()
+            }
+        }
     }
 
     public class RssiValue// : IRssiValue
