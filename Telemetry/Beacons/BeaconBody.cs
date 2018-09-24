@@ -8,7 +8,7 @@ namespace Trigger.Telemetry.Beacons
     {
         public string Mac { get; set; }
         private BeaconBody() { }
-        static BeaconBody Parse(string mac)
+        public static BeaconBody Parse(string mac)
         {
             return new BeaconBody { Mac = mac };
         }

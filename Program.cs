@@ -4,10 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Trigger.Telemetry.Beacons;
-using TriggerTest.Beacons;
-using TriggerTest.Http;
 using Trigger.Telemetry;
-using TriggerTest.Server;
 using System.IO;
 
 namespace TriggerTest

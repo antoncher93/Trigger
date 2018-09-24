@@ -121,7 +121,7 @@ namespace Trigger.Telemetry
             {
                 Mac = mac,
                 Values = new List<RssiValue>()
-            }
+            };
         }
     }
 

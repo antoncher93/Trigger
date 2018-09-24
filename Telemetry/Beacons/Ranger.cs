@@ -42,6 +42,9 @@ namespace Trigger.Telemetry.Beacons
             foundBeacFirstLine = new List<BeaconInfo>();
             foundBeacSecondLine = new List<BeaconInfo>();
             foundBeacHelpLine = new List<BeaconInfo>();
+
+            Enter += delegate { };
+            Exit += delegate { };
         }
 
         public event EventHandler<TriggerEventArgs> Enter;
