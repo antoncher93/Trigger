@@ -18,9 +18,8 @@ namespace Trigger.Telemetry.Beacons
     }
 
 
-    public class Ranger : ITriggerCallback
+    public class Ranger
     {
-        public string Uid { get; private set; }
         public List<IBeaconBody> FirstLineBeacons { get; private set; }
         public List<IBeaconBody> SecondLineBeacons { get; private set; }
         public List<IBeaconBody> HelpBeacons { get; private set; }
@@ -29,10 +28,10 @@ namespace Trigger.Telemetry.Beacons
         private List<BeaconInfo> foundBeacFirstLine;
         private List<BeaconInfo> foundBeacSecondLine;
         private List<BeaconInfo> foundBeacHelpLine;
-        private ITriggerCallback Callback;
+        
         private List<Beacon> commonList;
 
-        public APoint apoint;
+        private APoint apoint;
         private int slideAverageCount = 5;
 
         private Ranger()
@@ -43,8 +42,6 @@ namespace Trigger.Telemetry.Beacons
             foundBeacFirstLine = new List<BeaconInfo>();
             foundBeacSecondLine = new List<BeaconInfo>();
             foundBeacHelpLine = new List<BeaconInfo>();
-
-            Callback = this;
         }
 
         public event EventHandler<TriggerEventArgs> Enter;
@@ -95,7 +92,7 @@ namespace Trigger.Telemetry.Beacons
             if (max_2?.SlideAverageRssi >= max_1?.AverageRssi)
             {
                 Inside = true;
-                Callback?.OnEnter(apoint, beacon.DateTime);
+                Enter(this, new TriggerEventArgs(apoint, beacon.DateTime));
                 ResetAllSlideAverageRssi(foundBeacFirstLine);
             }
         }
@@ -110,7 +107,7 @@ namespace Trigger.Telemetry.Beacons
             if (max_2?.SlideAverageRssi >= max_1?.AverageRssi)
             {
                 Inside = false;
-                Callback?.OnExit(apoint, beacon.DateTime);
+                Exit(this, new TriggerEventArgs(apoint, beacon.DateTime));
                 ResetAllSlideAverageRssi(foundBeacSecondLine);
             }
         }
@@ -172,18 +169,6 @@ namespace Trigger.Telemetry.Beacons
             }
         }
 
-        public void OnEnter(APoint apoint, DateTime time)
-        {
-            Enter(this, new TriggerEventArgs(apoint, time));
-        }
-
-        public void OnExit(APoint apoint, DateTime time)
-        {
-            Exit(this, new TriggerEventArgs(apoint, time));
-        }
-
-       
-
         public class Builder
         {
             private Ranger ranger;
@@ -192,12 +177,6 @@ namespace Trigger.Telemetry.Beacons
             {
                 ranger = new Ranger();
             }
-
-            //public Builder SetCallback(ITriggerCallback callback)
-            //{
-            //    this.ranger.Callback = callback;
-            //    return this;
-            //}
 
             public Builder AddFirstLineBeacon(IBeaconBody beacon)
             {
@@ -220,6 +199,12 @@ namespace Trigger.Telemetry.Beacons
             public Builder SetCalcSlideAverageCount(int count)
             {
                 ranger.slideAverageCount = count;
+                return this;
+            }
+
+            public Builder SetAPointUid(string uid)
+            {
+                ranger.apoint = new APoint { Uid = uid };
                 return this;
             }
 
