@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Trigger.Telemetry.Beacons;
 using Trigger.Telemetry;
 using System.IO;
+using Trigger;
 
 namespace TriggerTest
 {
@@ -30,14 +31,13 @@ namespace TriggerTest
             int c = telemetry.Length;
             Telemetry ob = Newtonsoft.Json.JsonConvert.DeserializeObject<Telemetry>(telemetry);
 
-            //// строим ранжировщик телеметрии 
-            Ranger ranger = new Ranger.Builder()
+            // build telemetry ranger
+            Ranger ranger = new RangerBuilder()
                 .SetCalcSlideAverageCount(3) // коэф скольжения для настройки фильтрации
-                //.SetCallback(new Callback()) // слушатель результата
                 .AddFirstLineBeacon(BeaconBody.Parse(FirstBeacon)) // бикон первой линии
                 .AddSecondLineBeacon(BeaconBody.Parse(SecondBeacon)) // бикон второй линии
                 .AddHelpBeacon( BeaconBody.Parse(HelpBeacon)) // вспомогательный бикон
-                .SetAPointUid(null)// задаем Uid пользователя
+                .SetAPointUid(null) // задаем Uid пользователя
                 .Build();
 
             ranger.Enter += (s, e) => Console.WriteLine("Enter at " + e.DateTime);// подписка на событие входа

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Trigger.Telemetry
 {
-    public class Telemetry// : Trigger.Telemetry.IBeaconsTelemetry
+    public class Telemetry
     {
         public int Type { get; set; }
         public TelemetryData Data { get; set; }
@@ -87,14 +87,14 @@ namespace Trigger.Telemetry
         }
     }
 
-    public class TelemetryData// : ITelemetryData
+    public class TelemetryData
     {
         public string UserId { get; set; }
 
         public IList<APoint> APoints { get; set; }
     }
 
-    public class APoint// : IAccessPoint
+    public class APoint
     {
         public string Uid { get; set; }
         public IList<SingleBeaconTelemetry> Beacons { get; set; }
@@ -110,7 +110,7 @@ namespace Trigger.Telemetry
         }
     }
 
-    public class SingleBeaconTelemetry// : Trigger.Telemetry.ISingleBeaconValue
+    public class SingleBeaconTelemetry
     {
         public string Mac { get; set; }
         public IList<RssiValue> Values { get; set; }
@@ -125,7 +125,7 @@ namespace Trigger.Telemetry
         }
     }
 
-    public class RssiValue// : IRssiValue
+    public class RssiValue
     {
         public int Rssi { get; set; }
         public DateTime Time { get; set; }

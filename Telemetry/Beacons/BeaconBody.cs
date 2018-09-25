@@ -12,6 +12,5 @@ namespace Trigger.Telemetry.Beacons
         {
             return new BeaconBody { Mac = mac };
         }
-
     }
 }
