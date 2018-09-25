@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Trigger.Interfaces;
 
 namespace Trigger.Telemetry.Beacons
 {
@@ -16,20 +19,26 @@ namespace Trigger.Telemetry.Beacons
     }
 
 
-    public class Ranger
+    public class Ranger : IRangerEvents, IRangerConsumer
     {
-        public List<IBeaconBody> FirstLineBeacons { get; private set; }
-        public List<IBeaconBody> SecondLineBeacons { get; private set; }
-        public List<IBeaconBody> HelpBeacons { get; private set; }
-        public bool Inside { get; private set; }
+        #region Events
+        public event EventHandler<TriggerEventArgs> Enter;
+        public event EventHandler<TriggerEventArgs> Exit;
+        public event EventHandler<TriggerEventArgs> EnterByPeaks;
+        #endregion
 
-        private List<BeaconInfo> foundBeacFirstLine;
-        private List<BeaconInfo> foundBeacSecondLine;
-        private List<BeaconInfo> foundBeacHelpLine;
+        public IList<IBeaconBody> FirstLineBeacons { get; private set; }
+        public IList<IBeaconBody> SecondLineBeacons { get; private set; }
+        public IList<IBeaconBody> HelpBeacons { get; private set; }
         
-        private List<Beacon> commonList;
 
-        private APoint apoint;
+        private IList<BeaconInfo> foundBeacFirstLine;
+        private IList<BeaconInfo> foundBeacSecondLine;
+        private IList<BeaconInfo> foundBeacHelpLine;
+       
+        private APoint APoint;
+
+        private bool Inside = false;
         private int slideAverageCount = 5;
 
         public IList<TimeSpan?> PeakDistances { get; private set; }
@@ -39,6 +48,7 @@ namespace Trigger.Telemetry.Beacons
             FirstLineBeacons = new List<IBeaconBody>();
             SecondLineBeacons = new List<IBeaconBody>();
             HelpBeacons = new List<IBeaconBody>();
+
             foundBeacFirstLine = new List<BeaconInfo>();
             foundBeacSecondLine = new List<BeaconInfo>();
             foundBeacHelpLine = new List<BeaconInfo>();
@@ -46,54 +56,46 @@ namespace Trigger.Telemetry.Beacons
             PeakDistances = new List<TimeSpan?>();
         }
 
-        public event EventHandler<TriggerEventArgs> Enter;
-        public event EventHandler<TriggerEventArgs> Exit;
-
-        public event EventHandler<TriggerEventArgs> EnterByPeaks;
-
         public void CheckTelemetry(Telemetry telemetry)
         {
-            var res = telemetry.Data.APoints.FirstOrDefault(p => p.Uid == this.apoint.Uid);
+            var res = telemetry.Data.APoints.FirstOrDefault(p => p.Uid == APoint.Uid);
 
             if (res == null) return;
 
             var beacons = res.Beacons;
 
-            commonList = beacons.SelectMany(s => s.Values.Select(v => new Beacon { Mac = s.Mac, Rssi = v.Rssi, DateTime = v.Time })).ToList();
-            commonList = commonList.OrderBy(s => s.DateTime).ToList();
+            IOrderedEnumerable<Beacon> commonList = 
+                beacons.SelectMany(s => s.Values.Select(v => 
+                    new Beacon { Mac = s.Mac, Rssi = v.Rssi, DateTime = v.Time }))
+                    .OrderBy(s => s.DateTime);
 
-            for (int i = 0; i < commonList.Count; i++)
+            foreach (var b in commonList)
             {
-                RefreshBeaconInfo(commonList[i]);
-
+                RefreshBeaconInfo(b);
                 if (Inside)
-                {
-                    CheckExit(apoint, commonList[i]);
-                }
+                    CheckExit(APoint, b);
                 else
-                {
-                    CheckEnter(apoint, commonList[i]);
-                }
-
-                commonList.RemoveAt(i);
-                i--;
+                    CheckEnter(APoint,b);
             }
 
-            CalcPeakDistances();
+            commonList = null;
         }
 
         public void CheckTelemetry(string str)
         {
-            Telemetry telemetry = Newtonsoft.Json.JsonConvert.DeserializeObject<Telemetry>(str);
+            Telemetry telemetry = JsonConvert.DeserializeObject<Telemetry>(str);
+
             CheckTelemetry(telemetry);
+
+            CalcPeakDistances();
         }
 
         private void CheckEnter(APoint apoint, Beacon beacon)
         {
             if (Inside) return;
 
-            var max_1 = foundBeacFirstLine.Union(foundBeacHelpLine).OrderByDescending(b => b.AverageRssi).FirstOrDefault();
-            var max_2 = foundBeacSecondLine.OrderByDescending(b => b.SlideAverageRssi).FirstOrDefault();
+            BeaconInfo max_1 = foundBeacFirstLine.Concat(foundBeacHelpLine).OrderByDescending(b => b.AverageRssi).FirstOrDefault();
+            BeaconInfo max_2 = foundBeacSecondLine.OrderByDescending(b => b.SlideAverageRssi).FirstOrDefault();
 
             if (max_2?.SlideAverageRssi >= max_1?.AverageRssi)
             {
@@ -120,51 +122,28 @@ namespace Trigger.Telemetry.Beacons
 
         private void RefreshBeaconInfo(Beacon beacon)
         {
-            if (FirstLineBeacons.Any(b => b.Mac == beacon.Mac))
-            {
-                var res = foundBeacFirstLine.FirstOrDefault(beac => beac.MacAddress == beacon.Mac);
-                if (res == null)
+            Action<IList<IBeaconBody>, IList<BeaconInfo>> PopulateBeacon = (line, foundLine) =>
                 {
-                    res = new BeaconInfo(beacon.Mac);
-                    res.SlideAverageCount = slideAverageCount;
-                    foundBeacFirstLine.Add(res);
-                }
-                res.SetLastRssi(beacon.Rssi, beacon.DateTime);
-
-                return;
-            }
-
-            if (SecondLineBeacons.Any(b => b.Mac == beacon.Mac))
-            {
-                var res = foundBeacSecondLine.FirstOrDefault(beac => beac.MacAddress == beacon.Mac);
-                if (res == null)
-                {
-                    res = new BeaconInfo(beacon.Mac)
+                    if (line.Any(b => string.Equals(b.Mac, beacon.Mac, StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        SlideAverageCount = slideAverageCount
-                    };
-                    foundBeacSecondLine.Add(res);
-                }
-                res.SetLastRssi(beacon.Rssi, beacon.DateTime);
+                        var res = foundLine.FirstOrDefault(beac => 
+                            string.Equals(beac.MacAddress, beacon.Mac, StringComparison.InvariantCultureIgnoreCase));
 
-                return;
-            }
+                        if (res == null)
+                        {
+                            res = new BeaconInfo(beacon.Mac);
+                            res.SlideAverageCount = slideAverageCount;
+                            foundLine.Add(res);
+                        }
+                        res.SetLastRssi(beacon.Rssi, beacon.DateTime);
 
-            if (HelpBeacons.Any(b => b.Mac == beacon.Mac))
-            {
-                var res = foundBeacHelpLine.FirstOrDefault(beac => beac.MacAddress == beacon.Mac);
-                if (res == null)
-                {
-                    res = new BeaconInfo(beacon.Mac)
-                    {
-                        SlideAverageCount = slideAverageCount
-                    };
-                    foundBeacHelpLine.Add(res);
-                }
-                res.SetLastRssi(beacon.Rssi, beacon.DateTime);
+                        return;
+                    }
+                };
 
-                return;
-            }
+            PopulateBeacon(FirstLineBeacons, foundBeacFirstLine);
+            PopulateBeacon(SecondLineBeacons, foundBeacSecondLine);
+            PopulateBeacon(HelpBeacons, foundBeacHelpLine);
         }
 
         private void CheckEnterByPeaks()
@@ -176,9 +155,8 @@ namespace Trigger.Telemetry.Beacons
 
             if((beacon1.Peak.Time - beacon2.Peak.Time).TotalSeconds >= 3)
             {
-                EnterByPeaks(this, new TriggerEventArgs(apoint, beacon2.Peak.Time));
+                EnterByPeaks(this, new TriggerEventArgs(APoint, beacon2.Peak.Time));
             }
-
         }
 
         private void CalcPeakDistances()
@@ -200,16 +178,12 @@ namespace Trigger.Telemetry.Beacons
         }
 
         private void ResetAllSlideAverageRssi(IList<BeaconInfo> beacons)
-        {
-            for(int i = 0; i< beacons.Count; i++)
-            {
-                beacons[i].ResetSlideAverageRssi();
-            }
-        }
+            => Parallel.ForEach(beacons, (b) => b.ResetSlideAverageRssi());
 
         public void SetSlideAverageCount(int _slideAverageCount)
             => slideAverageCount = _slideAverageCount;
+
         public void SetAPoint(APoint _apoint)
-            => apoint = _apoint;
+            => APoint = _apoint;
     }
 }

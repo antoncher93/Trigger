@@ -16,13 +16,7 @@ namespace Trigger.Telemetry.Beacons
 
         private int count;
         private List<int> slideCollect;
-        private int slideCount = 5;
-        public int SlideAverageCount
-        {
-            get { return slideCount; }
-            set { slideCount = value; }
-        }
-
+        public int SlideAverageCount { get; set; }
 
         public BeaconInfo(string mac)
         {
@@ -58,12 +52,10 @@ namespace Trigger.Telemetry.Beacons
 
             AverageRssi = ((AverageRssi * (count - 1)) + value) / count;
 
-            if (slideCollect.Count >= slideCount)
+            if (slideCollect.Count >= SlideAverageCount)
             {
                 slideCollect.RemoveAt(0);
             }
-
-            
 
             slideCollect.Add(value);
             SlideAverageRssi = CalcSlideAverageRssi();
@@ -90,7 +82,6 @@ namespace Trigger.Telemetry.Beacons
             }
 
             return sum / slideCollect.Count;
-
         }
 
         public class RssiPeak
