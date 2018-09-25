@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
-using SCAppLibrary.Android.Beacons;
 
 namespace Trigger.Telemetry.Beacons
 {
@@ -36,7 +34,7 @@ namespace Trigger.Telemetry.Beacons
 
         public IList<TimeSpan?> PeakDistances { get; private set; }
 
-        private Ranger()
+        public Ranger()
         {
             FirstLineBeacons = new List<IBeaconBody>();
             SecondLineBeacons = new List<IBeaconBody>();
@@ -132,7 +130,7 @@ namespace Trigger.Telemetry.Beacons
                     foundBeacFirstLine.Add(res);
                 }
                 res.SetLastRssi(beacon.Rssi, beacon.DateTime);
-                //CheckEnter();
+
                 return;
             }
 
@@ -148,7 +146,7 @@ namespace Trigger.Telemetry.Beacons
                     foundBeacSecondLine.Add(res);
                 }
                 res.SetLastRssi(beacon.Rssi, beacon.DateTime);
-                //CheckEnter();
+
                 return;
             }
 
@@ -164,7 +162,7 @@ namespace Trigger.Telemetry.Beacons
                     foundBeacHelpLine.Add(res);
                 }
                 res.SetLastRssi(beacon.Rssi, beacon.DateTime);
-                //CheckEnter();
+
                 return;
             }
         }
@@ -209,51 +207,9 @@ namespace Trigger.Telemetry.Beacons
             }
         }
 
-        public class Builder
-        {
-            private Ranger ranger;
-
-            public Builder()
-            {
-                ranger = new Ranger();
-            }
-
-            public Builder AddFirstLineBeacon(IBeaconBody beacon)
-            {
-                ranger.FirstLineBeacons.Add(beacon);
-                return this;
-            }
-
-            public Builder AddSecondLineBeacon(IBeaconBody beacon)
-            {
-                ranger.SecondLineBeacons.Add(beacon);
-                return this;
-            }
-
-            public Builder AddHelpBeacon(IBeaconBody beacon)
-            {
-                ranger.HelpBeacons.Add(beacon);
-                return this;
-            }
-
-            public Builder SetCalcSlideAverageCount(int count)
-            {
-                ranger.slideAverageCount = count;
-                return this;
-            }
-
-            public Builder SetAPointUid(string uid)
-            {
-                ranger.apoint = new APoint { Uid = uid };
-                return this;
-            }
-
-            public Ranger Build()
-            {
-                return this.ranger;
-            }
-        }
-
-
+        public void SetSlideAverageCount(int _slideAverageCount)
+            => slideAverageCount = _slideAverageCount;
+        public void SetAPoint(APoint _apoint)
+            => apoint = _apoint;
     }
 }
