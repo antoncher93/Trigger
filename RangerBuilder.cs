@@ -7,6 +7,8 @@ namespace Trigger
     {
         private Ranger ranger = new Ranger();
 
+
+
         public RangerBuilder AddFirstLineBeacon(IBeaconBody beacon)
         {
             ranger.FirstLineBeacons.Add(beacon);
