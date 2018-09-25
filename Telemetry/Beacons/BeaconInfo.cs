@@ -12,6 +12,7 @@ namespace Trigger.Telemetry.Beacons
         public double MaxRssi { get; private set; }
         public double SlideAverageRssi { get; private set; }
         public DateTime LastRssiTime { get; private set; }
+        public RssiPeak Peak { get; private set; }
 
         private int count;
         private List<int> slideCollect;
@@ -26,10 +27,10 @@ namespace Trigger.Telemetry.Beacons
         public BeaconInfo(string mac)
         {
             MacAddress = mac;
-            LastRssi = 0;
-            AverageRssi = 0;
-            MaxRssi = -100;
-            SlideAverageRssi = -100;
+            LastRssi = -999;
+            AverageRssi = -999;
+            MaxRssi = -999;
+            SlideAverageRssi = -999;
             count = 0;
 
             slideCollect = new List<int>();
@@ -49,12 +50,7 @@ namespace Trigger.Telemetry.Beacons
         public void SetLastRssi(int value, DateTime time)
         {
             count++;
-
-            if(MacAddress == "DE:A6:78:08:52:A2")
-            {
-
-            }
-
+           
             LastRssi = value;
             LastRssiTime = time;
 
@@ -67,9 +63,22 @@ namespace Trigger.Telemetry.Beacons
                 slideCollect.RemoveAt(0);
             }
 
+            
+
             slideCollect.Add(value);
             SlideAverageRssi = CalcSlideAverageRssi();
-          
+
+            if (slideCollect.Count > 1 && SlideAverageRssi < slideCollect[slideCollect.Count - 1])
+            {
+                if (Peak == null || Peak.Rssi < SlideAverageRssi)
+                {
+                    //if(MacAddress == "E3:25:3E:0A:7E:4C")
+                    //{
+
+                    //}
+                    Peak = new RssiPeak { Rssi = SlideAverageRssi, Time = time };
+                }
+            }
         }
 
         private double CalcSlideAverageRssi()
@@ -82,6 +91,12 @@ namespace Trigger.Telemetry.Beacons
 
             return sum / slideCollect.Count;
 
+        }
+
+        public class RssiPeak
+        {
+            public double Rssi { get; set; }
+            public DateTime Time { get; set; }
         }
     }
 }

@@ -32,6 +32,8 @@ namespace Trigger.Telemetry.Beacons
         private APoint apoint;
         private int slideAverageCount = 5;
 
+        public IList<TimeSpan?> PeakDistances { get; private set; }
+
         public Ranger()
         {
             FirstLineBeacons = new List<IBeaconBody>();
@@ -40,10 +42,14 @@ namespace Trigger.Telemetry.Beacons
             foundBeacFirstLine = new List<BeaconInfo>();
             foundBeacSecondLine = new List<BeaconInfo>();
             foundBeacHelpLine = new List<BeaconInfo>();
+
+            PeakDistances = new List<TimeSpan?>();
         }
 
         public event EventHandler<TriggerEventArgs> Enter;
         public event EventHandler<TriggerEventArgs> Exit;
+
+        public event EventHandler<TriggerEventArgs> EnterByPeaks;
 
         public void CheckTelemetry(Telemetry telemetry)
         {
@@ -72,6 +78,8 @@ namespace Trigger.Telemetry.Beacons
                 commonList.RemoveAt(i);
                 i--;
             }
+
+            CalcPeakDistances();
         }
 
         public void CheckTelemetry(string str)
@@ -156,6 +164,38 @@ namespace Trigger.Telemetry.Beacons
                 res.SetLastRssi(beacon.Rssi, beacon.DateTime);
 
                 return;
+            }
+        }
+
+        private void CheckEnterByPeaks()
+        {
+            var beacon1 = foundBeacFirstLine.FirstOrDefault(b => b.Peak != null);
+            if (beacon1 == null) return;
+            var beacon2 = foundBeacSecondLine.FirstOrDefault(b => b.Peak != null);
+            if (beacon2 == null) return;
+
+            if((beacon1.Peak.Time - beacon2.Peak.Time).TotalSeconds >= 3)
+            {
+                EnterByPeaks(this, new TriggerEventArgs(apoint, beacon2.Peak.Time));
+            }
+
+        }
+
+        private void CalcPeakDistances()
+        {
+            int i = 0;
+            bool next = true;
+            while(next)
+            {
+                if(foundBeacFirstLine.Count > i && foundBeacSecondLine.Count > i)
+                {
+                    PeakDistances.Add(foundBeacFirstLine[i].Peak?.Time - foundBeacSecondLine[i].Peak?.Time);
+                    i++;
+                }
+                else
+                {
+                    next = false;
+                }
             }
         }
 
