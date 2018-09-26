@@ -14,6 +14,7 @@ namespace TriggerTest
     {
         static void Main(string[] args)
         {
+
             // мак адреса биконов первой, второй и вспомогательной линий
             string FirstBeacon = "DF:20:C6:5A:62:5F";
             string SecondBeacon = "E3:25:3E:0A:7E:4C";
