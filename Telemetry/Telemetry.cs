@@ -1,10 +1,56 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 
 namespace Trigger.Telemetry
 {
+    public class TelemetryGroup : ICollection<Telemetry>
+    {
+        private ICollection<Telemetry> _collection = new List<Telemetry>();
+
+        public int Count => throw new NotImplementedException();
+
+        public bool IsReadOnly => throw new NotImplementedException();
+
+        public void Add(Telemetry item)
+        {
+            if (!this.Any(t => t.Data.UserId == item.Data.UserId))
+                _collection.Add(item);
+            else _collection.FirstOrDefault(t => t.Data.UserId == item.Data.UserId).Append(item);
+        }
+
+        public void Clear()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Contains(Telemetry item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CopyTo(Telemetry[] array, int arrayIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerator<Telemetry> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Remove(Telemetry item)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class Telemetry
     {
         public int Type { get; set; }
@@ -12,23 +58,22 @@ namespace Trigger.Telemetry
 
         public void Append(Telemetry telemetry)
         {
-            //if (telemetry == null) return;
-            if(this.Data?.UserId == telemetry.Data?.UserId)
+            if (Data?.UserId == telemetry.Data?.UserId)
             {
                 foreach(var ap in telemetry.Data.APoints)
                 {
-                    APoint ap_res = this.Data.APoints.FirstOrDefault(p => p.Uid == ap.Uid);
-                    if(ap_res == null)
+                    APoint ap_res = Data.APoints.FirstOrDefault(p => p.Uid == ap.Uid);
+                    if (ap_res == null)
                     {
                         ap_res = ap;
-                        this.Data.APoints.Add(ap_res);
+                        Data.APoints.Add(ap_res);
                     }
                     else
                     {
-                        foreach(var beacon in ap.Beacons)
+                        foreach (var beacon in ap.Beacons)
                         {
                             SingleBeaconTelemetry beac_res = ap_res.Beacons.FirstOrDefault(b => b.Mac == beacon.Mac);
-                            if(beac_res == null)
+                            if (beac_res == null)
                             {
                                 beac_res = beacon;
                                 ap_res.Beacons.Add(beac_res);

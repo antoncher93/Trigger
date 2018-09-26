@@ -9,17 +9,19 @@ namespace Trigger.Telemetry.Beacons
 {
     public class TriggerEventArgs : EventArgs
     {
-        public TriggerEventArgs(APoint apoint, DateTime time)
+        public TriggerEventArgs(APoint apoint, DateTime time, string userId)
         {
             APoint = apoint;
             DateTime = time;
+            UserId = userId;
         }
         public APoint APoint { get; private set; }
         public DateTime DateTime { get; private set; }
+        public string UserId { get; private set; }
     }
 
 
-    public class Ranger : IRangerEvents, IRangerConsumer
+    public class Ranger : IRangerEvents
     {
         #region Events
         public event EventHandler<TriggerEventArgs> Enter;
@@ -58,6 +60,9 @@ namespace Trigger.Telemetry.Beacons
 
         public void CheckTelemetry(Telemetry telemetry)
         {
+            if (telemetry == null)
+                return;
+
             var res = telemetry.Data.APoints.FirstOrDefault(p => p.Uid == APoint.Uid);
 
             if (res == null) return;
@@ -73,9 +78,9 @@ namespace Trigger.Telemetry.Beacons
             {
                 RefreshBeaconInfo(b);
                 if (Inside)
-                    CheckExit(APoint, b);
+                    CheckExit(APoint, b, telemetry.Data.UserId);
                 else
-                    CheckEnter(APoint,b);
+                    CheckEnter(APoint,b, telemetry.Data.UserId);
             }
 
             commonList = null;
@@ -84,15 +89,22 @@ namespace Trigger.Telemetry.Beacons
         public void CheckTelemetry(string str)
         {
             Telemetry telemetry = JsonConvert.DeserializeObject<Telemetry>(str);
+            
 
+            //if (Inside == true && (DateTime.Now - LastEntranceDate) > new TimeSpan(0, 10, 0))
+            //{
+            //    Inside = false;
+            //    telemetry.Flush(LastEntranceDate);
+            //}
             CheckTelemetry(telemetry);
 
             CalcPeakDistances();
         }
 
-        private void CheckEnter(APoint apoint, Beacon beacon)
+        private void CheckEnter(APoint apoint, Beacon beacon, string userId)
         {
-            if (Inside) return;
+            if (Inside)
+                return;
 
             BeaconInfo max_1 = foundBeacFirstLine.Concat(foundBeacHelpLine).OrderByDescending(b => b.AverageRssi).FirstOrDefault();
             BeaconInfo max_2 = foundBeacSecondLine.OrderByDescending(b => b.SlideAverageRssi).FirstOrDefault();
@@ -100,14 +112,15 @@ namespace Trigger.Telemetry.Beacons
             if (max_2?.SlideAverageRssi >= max_1?.AverageRssi)
             {
                 Inside = true;
-                Enter?.Invoke(this, new TriggerEventArgs(apoint, beacon.DateTime));
+                Enter?.Invoke(this, new TriggerEventArgs(apoint, beacon.DateTime, userId));
                 ResetAllSlideAverageRssi(foundBeacFirstLine);
             }
         }
 
-        private void CheckExit(APoint apoint, Beacon beacon)
+        private void CheckExit(APoint apoint, Beacon beacon, string userId)
         {
-            if (!Inside) return;
+            if (!Inside)
+                return;
 
             BeaconInfo max_1 = foundBeacSecondLine.OrderByDescending(b => b.AverageRssi).FirstOrDefault();
             BeaconInfo max_2 = foundBeacFirstLine.OrderByDescending(b => b.SlideAverageRssi).FirstOrDefault();
@@ -115,7 +128,7 @@ namespace Trigger.Telemetry.Beacons
             if (max_2?.SlideAverageRssi >= max_1?.AverageRssi)
             {
                 Inside = false;
-                Exit?.Invoke(this, new TriggerEventArgs(apoint, beacon.DateTime));
+                Exit?.Invoke(this, new TriggerEventArgs(apoint, beacon.DateTime, userId));
                 ResetAllSlideAverageRssi(foundBeacSecondLine);
             }
         }
@@ -155,7 +168,7 @@ namespace Trigger.Telemetry.Beacons
 
             if((beacon1.Peak.Time - beacon2.Peak.Time).TotalSeconds >= 3)
             {
-                EnterByPeaks(this, new TriggerEventArgs(APoint, beacon2.Peak.Time));
+                EnterByPeaks(this, new TriggerEventArgs(APoint, beacon2.Peak.Time, ""));
             }
         }
 
