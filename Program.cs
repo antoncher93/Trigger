@@ -33,7 +33,7 @@ namespace TriggerTest
 
             // build telemetry ranger
             Ranger ranger = new RangerBuilder()
-                .SetCalcSlideAverageCount(3) // коэф скольжения для настройки фильтрации
+                .SetCalcSlideAverageCount(4) // коэф скольжения для настройки фильтрации
                 .AddFirstLineBeacon(BeaconBody.Parse(FirstBeacon)) // бикон первой линии
                 .AddSecondLineBeacon(BeaconBody.Parse(SecondBeacon)) // бикон второй линии
                 .AddHelpBeacon( BeaconBody.Parse(HelpBeacon)) // вспомогательный бикон
