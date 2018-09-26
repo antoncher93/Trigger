@@ -19,7 +19,7 @@ namespace Trigger.Telemetry.Beacons
     }
 
 
-    public class Ranger : IRangerEvents, IRangerConsumer
+    public class Ranger : IRangerEvents//, IRangerConsumer
     {
         #region Events
         public event EventHandler<TriggerEventArgs> Enter;
