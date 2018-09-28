@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,6 +85,11 @@ namespace Trigger.Telemetry.Beacons
             }
 
             commonList = null;
+
+            foundBeacFirstLine.Clear();
+            foundBeacSecondLine.Clear();
+            foundBeacHelpLine.Clear();
+            Inside = false;
         }
 
         public void CheckTelemetry(string str)

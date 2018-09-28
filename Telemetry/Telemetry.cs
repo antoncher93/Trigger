@@ -5,52 +5,6 @@ using System.Linq;
 
 namespace Trigger.Telemetry
 {
-    public class TelemetryGroup : ICollection<Telemetry>
-    {
-        private ICollection<Telemetry> _collection = new List<Telemetry>();
-
-        public int Count => throw new NotImplementedException();
-
-        public bool IsReadOnly => throw new NotImplementedException();
-
-        public void Add(Telemetry item)
-        {
-            if (!this.Any(t => t.Data.UserId == item.Data.UserId))
-                _collection.Add(item);
-            else _collection.FirstOrDefault(t => t.Data.UserId == item.Data.UserId).Append(item);
-        }
-
-        public void Clear()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Contains(Telemetry item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void CopyTo(Telemetry[] array, int arrayIndex)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerator<Telemetry> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Remove(Telemetry item)
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     public class Telemetry
     {
         public int Type { get; set; }
