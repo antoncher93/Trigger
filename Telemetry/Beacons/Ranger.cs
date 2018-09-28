@@ -2,30 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Trigger.Telemetry.Interfaces;
 
 namespace Trigger.Telemetry.Beacons
 {
-    public class TriggerEventArgs : EventArgs
-    {
-        public TriggerEventArgs(APoint apoint, DateTime time, string userId)
-        {
-            APoint = apoint;
-            DateTime = time;
-            UserId = userId;
-        }
-        public APoint APoint { get; private set; }
-        public DateTime DateTime { get; private set; }
-        public string UserId { get; private set; }
-    }
-
-
     public class Ranger : IRangerEvents
     {
-        #region Events
-        public event EventHandler<TriggerEventArgs> Enter;
-        public event EventHandler<TriggerEventArgs> Exit;
-        public event EventHandler<TriggerEventArgs> EnterByPeaks;
-        #endregion
         public List<IBeaconBody> FirstLineBeacons { get; private set; }
         public List<IBeaconBody> SecondLineBeacons { get; private set; }
         public List<IBeaconBody> HelpBeacons { get; private set; }
@@ -58,11 +40,11 @@ namespace Trigger.Telemetry.Beacons
                 {
                     if(value == AppearStatus.Inside)
                     {
-                        Enter?.Invoke(this, new TriggerEventArgs(apoint, lastbeacon.DateTime));
+                        Enter?.Invoke(this, new TriggerEventArgs(apoint, lastbeacon.DateTime, tele));
                     }
                     else
                     {
-                           Exit?.Invoke(this, new TriggerEventArgs(apoint, lastbeacon.DateTime));
+                        Exit?.Invoke(this, new TriggerEventArgs(apoint, lastbeacon.DateTime));
                     }
                 }
 
@@ -90,7 +72,6 @@ namespace Trigger.Telemetry.Beacons
 
         public event EventHandler<TriggerEventArgs> Enter;
         public event EventHandler<TriggerEventArgs> Exit;
-
         public event EventHandler<TriggerEventArgs> EnterByPeaks;
 
         public void CheckTelemetry(Telemetry telemetry)
@@ -98,7 +79,7 @@ namespace Trigger.Telemetry.Beacons
             if (telemetry == null)
                 return;
 
-            var res = telemetry.Data.APoints.FirstOrDefault(p => p.Uid == APoint.Uid);
+            var res = telemetry.Data.APoints.FirstOrDefault(p => p.Uid == apoint.Uid);
 
             if (res == null) return;
 
@@ -287,7 +268,7 @@ namespace Trigger.Telemetry.Beacons
 
             if((beacon1.Peak.Time - beacon2.Peak.Time).TotalSeconds >= 3)
             {
-                EnterByPeaks(this, new TriggerEventArgs(apoint, beacon2.Peak.Time));
+                EnterByPeaks(this, new TriggerEventArgs(apoint, beacon2.Peak.Time, ));
             }
 
         }

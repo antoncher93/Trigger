@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Trigger.Telemetry.Beacons;
 
-namespace Trigger.Interfaces
+namespace Trigger.Telemetry.Interfaces
 {
     public interface IRangerEvents
     {
