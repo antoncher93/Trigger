@@ -31,6 +31,8 @@ namespace Trigger.Telemetry.Beacons
 
         private AppearStatus status;
 
+        private string UserUid { get; set; }
+
         private AppearStatus Status
         {
             get => status;
@@ -40,11 +42,11 @@ namespace Trigger.Telemetry.Beacons
                 {
                     if(value == AppearStatus.Inside)
                     {
-                        Enter?.Invoke(this, new TriggerEventArgs(apoint, lastbeacon.DateTime, tele));
+                        Enter?.Invoke(this, new TriggerEventArgs(apoint, lastbeacon.DateTime, UserUid));
                     }
                     else
                     {
-                        Exit?.Invoke(this, new TriggerEventArgs(apoint, lastbeacon.DateTime));
+                        Exit?.Invoke(this, new TriggerEventArgs(apoint, lastbeacon.DateTime, UserUid));
                     }
                 }
 
@@ -268,7 +270,7 @@ namespace Trigger.Telemetry.Beacons
 
             if((beacon1.Peak.Time - beacon2.Peak.Time).TotalSeconds >= 3)
             {
-                EnterByPeaks(this, new TriggerEventArgs(apoint, beacon2.Peak.Time, ));
+                EnterByPeaks(this, new TriggerEventArgs(apoint, beacon2.Peak.Time, UserUid));
             }
 
         }
