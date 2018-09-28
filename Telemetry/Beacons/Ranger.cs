@@ -26,6 +26,10 @@ namespace Trigger.Telemetry.Beacons
         private List<BeaconInfo> foundBeacFirstLine;
         private List<BeaconInfo> foundBeacSecondLine;
         private List<BeaconInfo> foundBeacHelpLine;
+
+        private BeaconInfoGroup FirstLineInfo;
+        private BeaconInfoGroup SecondLineInfo;
+        private BeaconInfoGroup HelpLineInfo;
         
         private List<Beacon> commonList;
 
@@ -33,6 +37,30 @@ namespace Trigger.Telemetry.Beacons
         private int slideAverageCount = 5;
 
         public IList<TimeSpan?> PeakDistances { get; private set; }
+        private Beacon lastbeacon;
+
+        private AppearStatus status;
+
+        private AppearStatus Status
+        {
+            get => status;
+            set
+            {
+                if(status != AppearStatus.Unknown && status != value)
+                {
+                    if(value == AppearStatus.Inside)
+                    {
+                        Enter?.Invoke(this, new TriggerEventArgs(apoint, lastbeacon.DateTime));
+                    }
+                    else
+                    {
+                           Exit?.Invoke(this, new TriggerEventArgs(apoint, lastbeacon.DateTime));
+                    }
+                }
+
+                status = value;
+            }
+        }
 
         public Ranger()
         {
@@ -44,6 +72,12 @@ namespace Trigger.Telemetry.Beacons
             foundBeacHelpLine = new List<BeaconInfo>();
 
             PeakDistances = new List<TimeSpan?>();
+
+            status = AppearStatus.Unknown;
+
+            FirstLineInfo = new BeaconInfoGroup();
+            SecondLineInfo = new BeaconInfoGroup();
+            HelpLineInfo = new BeaconInfoGroup();
         }
 
         public event EventHandler<TriggerEventArgs> Enter;
@@ -64,22 +98,55 @@ namespace Trigger.Telemetry.Beacons
 
             for (int i = 0; i < commonList.Count; i++)
             {
-                RefreshBeaconInfo(commonList[i]);
+                //RefreshBeaconInfo(commonList[i]);
 
-                if (Inside)
-                {
-                    CheckExit(apoint, commonList[i]);
-                }
-                else
-                {
-                    CheckEnter(apoint, commonList[i]);
-                }
+                RefreshBeaconInfoGroup(commonList[i]);
+                CheckSlideAverageRSSI(apoint, commonList[i]);
+                //if (Inside)
+                //{
+                //    CheckExit(apoint, commonList[i]);
+                //}
+                //else
+                //{
+                //    CheckEnter(apoint, commonList[i]);
+                //}
 
                 commonList.RemoveAt(i);
                 i--;
             }
 
             CalcPeakDistances();
+        }
+
+        private void ResetSlideRssiIfNeed(BeaconInfoGroup group, Beacon beacon, TimeSpan? timeoffset)
+        {
+            foreach( var b in group)
+            {
+                if((beacon.DateTime - b.LastRssiTime )>=timeoffset)
+                {
+                    b.ResetSlideAverageRssi();
+                }
+            }
+        }
+
+        public void CheckSlideAverageRSSI(APoint apoint, Beacon beacon)
+        {
+            lastbeacon = beacon;
+            if(SecondLineInfo.MaxSlideRssi > GetMax(FirstLineInfo, HelpLineInfo).MaxSlideRssi)
+            {
+                Status = AppearStatus.Inside;
+            }
+            else if(FirstLineInfo.MaxSlideRssi > SecondLineInfo.MaxSlideRssi)
+            {
+                Status = AppearStatus.Outside;
+            }
+        }
+
+        private BeaconInfoGroup GetMax(BeaconInfoGroup a, BeaconInfoGroup b)
+        {
+            BeaconInfoGroup res = a;
+            if (b?.MaxSlideRssi > a.MaxSlideRssi) res = b;
+            return res;
         }
 
         public void CheckTelemetry(string str)
@@ -116,6 +183,37 @@ namespace Trigger.Telemetry.Beacons
                 Exit?.Invoke(this, new TriggerEventArgs(apoint, beacon.DateTime));
                 ResetAllSlideAverageRssi(foundBeacSecondLine);
             }
+        }
+
+        private void RefreshBeaconInfoGroup(Beacon beacon)
+        {
+            Action<Beacon, IList<IBeaconBody>, BeaconInfoGroup> CheckBeacon = (beac, line, group) => 
+            {
+                if (line.Any(b => b.Mac == beac.Mac))
+                {
+                    
+                    var res = group.FirstOrDefault(b => b.MacAddress == beacon.Mac);
+                    if (res == null)
+                    {
+                        res = new BeaconInfo(beac.Mac);
+                        res.SlideAverageCount = slideAverageCount;
+                        group.Add(res);
+                    }
+                    res.SetLastRssi(beac.Rssi, beac.DateTime);
+
+                    return;
+                }
+            };
+            CheckBeacon(beacon, FirstLineBeacons, FirstLineInfo);
+            CheckBeacon(beacon, SecondLineBeacons, SecondLineInfo);
+            CheckBeacon(beacon, HelpBeacons, HelpLineInfo);
+
+            TimeSpan? timeoffset = new TimeSpan?(new TimeSpan(0, 0, 2));
+
+            ResetSlideRssiIfNeed(FirstLineInfo, beacon, timeoffset);
+            ResetSlideRssiIfNeed(SecondLineInfo, beacon, timeoffset);
+            ResetSlideRssiIfNeed(HelpLineInfo, beacon, timeoffset);
+
         }
 
         private void RefreshBeaconInfo(Beacon beacon)
