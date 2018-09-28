@@ -23,7 +23,7 @@ namespace Trigger.Telemetry
             }
             else
             {
-
+                res.Append(item);
             }
         }
 

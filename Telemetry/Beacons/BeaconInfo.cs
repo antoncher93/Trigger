@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Timers;
 
 namespace Trigger.Telemetry.Beacons
 {
@@ -13,6 +14,9 @@ namespace Trigger.Telemetry.Beacons
         public double SlideAverageRssi { get; private set; }
         public DateTime LastRssiTime { get; private set; }
         public RssiPeak Peak { get; private set; }
+
+
+        private Timer timer;
 
         private int count;
         private List<int> slideCollect;
@@ -28,17 +32,14 @@ namespace Trigger.Telemetry.Beacons
             count = 0;
 
             slideCollect = new List<int>();
+
+          
         }
 
         public void ResetSlideAverageRssi()
         {
             SlideAverageRssi = -200;
-            for(int i = slideCollect.Count - 1; i>=0; i--)
-            {
-                slideCollect.RemoveAt(i);
-            }
-
-            slideCollect = new List<int>();
+            slideCollect.Clear();
         }
 
         public void SetLastRssi(int value, DateTime time)
@@ -71,6 +72,7 @@ namespace Trigger.Telemetry.Beacons
                     Peak = new RssiPeak { Rssi = SlideAverageRssi, Time = time };
                 }
             }
+           
         }
 
         private double CalcSlideAverageRssi()
