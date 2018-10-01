@@ -12,42 +12,21 @@ namespace Trigger.Telemetry
 
         public void Append(Telemetry telemetry)
         {
-            //if (telemetry == null) return;
-            if(this.Data?.UserId == telemetry.Data?.UserId)
+            if(string.Equals(telemetry.Data.UserId, this.Data.UserId, StringComparison.CurrentCulture))
             {
-                foreach(var ap in telemetry.Data.APoints)
+                foreach(APoint apoint in telemetry.Data.APoints)
                 {
-                    APoint ap_res = this.Data.APoints.FirstOrDefault(p => p.Uid == ap.Uid);
-                    if(ap_res == null)
+                    APoint res = this.Data.APoints.FirstOrDefault(ap => string.Equals(ap.Uid, apoint.Uid));
+                    if(res == null)
                     {
-                        ap_res = ap;
-                        this.Data.APoints.Add(ap_res);
+                        this.Data.APoints.Add(apoint);
                     }
                     else
                     {
-                        foreach(var beacon in ap.Beacons)
-                        {
-                            SingleBeaconTelemetry beac_res = ap_res.Beacons.FirstOrDefault(b => b.Mac == beacon.Mac);
-                            if(beac_res == null)
-                            {
-                                beac_res = beacon;
-                                ap_res.Beacons.Add(beac_res);
-                            }
-                            else
-                            {
-                                foreach(var value in beacon.Values)
-                                {
-                                    RssiValue val_res = beac_res.Values.FirstOrDefault(v => v.Time == value.Time);
-                                    if(val_res == null)
-                                    {
-                                        val_res = value;
-                                        beac_res.Values.Add(val_res);
-                                    }
-                                }
-                            }
-                        }
+                        res.Append(apoint);
                     }
                 }
+                
             }
         }
 
@@ -105,8 +84,24 @@ namespace Trigger.Telemetry
                 Uid = uid,
                 Beacons = new List<SingleBeaconTelemetry>()
             };
-
-
+        }
+        public void Append(APoint apoint)
+        {
+            if(string.Equals(this.Uid, apoint.Uid, StringComparison.CurrentCultureIgnoreCase))
+            {
+                foreach(var beacon in apoint.Beacons)
+                {
+                    SingleBeaconTelemetry res = this.Beacons.FirstOrDefault(b => string.Equals(b.Mac, beacon.Mac, StringComparison.CurrentCultureIgnoreCase));
+                    if(res == null)
+                    {
+                        this.Beacons.Add(beacon);
+                    }
+                    else
+                    {
+                        res.Append(beacon);
+                    }
+                }
+            }
         }
     }
 
@@ -122,6 +117,20 @@ namespace Trigger.Telemetry
                 Mac = mac,
                 Values = new List<RssiValue>()
             };
+        }
+
+        public void Append(SingleBeaconTelemetry beacon)
+        {
+            if(string.Equals(this.Mac, beacon.Mac, StringComparison.CurrentCultureIgnoreCase))
+            {
+                foreach(var rssi in beacon.Values)
+                {
+                    if(!this.Values.Any(b => b.Time.Equals(rssi.Time)))
+                    {
+                        this.Values.Add(rssi);
+                    }
+                }
+            }
         }
     }
 
