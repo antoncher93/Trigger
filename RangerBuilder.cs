@@ -1,4 +1,5 @@
-﻿using Trigger.Telemetry;
+﻿using System;
+using Trigger.Telemetry;
 using Trigger.Telemetry.Beacons;
 
 namespace Trigger
@@ -7,37 +8,26 @@ namespace Trigger
     {
         private Ranger ranger = new Ranger();
 
-
+        private RangerBuilder Modify(Action act)
+        {
+            act?.Invoke();
+            return this;
+        }
 
         public RangerBuilder AddFirstLineBeacon(IBeaconBody beacon)
-        {
-            ranger.FirstLineBeacons.Add(beacon);
-            return this;
-        }
+            => Modify(() => { ranger.FirstLineBeacons.Add(beacon); });
 
         public RangerBuilder AddSecondLineBeacon(IBeaconBody beacon)
-        {
-            ranger.SecondLineBeacons.Add(beacon);
-            return this;
-        }
+            => Modify(() => { ranger.SecondLineBeacons.Add(beacon); });
 
         public RangerBuilder AddHelpBeacon(IBeaconBody beacon)
-        {
-            ranger.HelpBeacons.Add(beacon);
-            return this;
-        }
+            => Modify(() => { ranger.HelpBeacons.Add(beacon); });
 
         public RangerBuilder SetCalcSlideAverageCount(int count)
-        {
-            ranger.SetSlideAverageCount(count);
-            return this;
-        }
+            => Modify(() => { ranger.SetSlideAverageCount(count); });
 
         public RangerBuilder SetAPointUid(string uid)
-        {
-            ranger.SetAPoint(new APoint { Uid = uid });
-            return this;
-        }
+            => Modify(() => { ranger.SetAPoint(new APoint { Uid = uid }); });
 
         public Ranger Build() => ranger;
     }

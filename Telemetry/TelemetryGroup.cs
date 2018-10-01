@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 
 namespace Trigger.Telemetry
 {
     public class TelemetryGroup : ICollection<Telemetry>
     {
-        private ICollection<Telemetry> _telemetries;
+        private IList<Telemetry> _telemetries = new List<Telemetry>();
 
         public int Count => _telemetries.Count;
 
@@ -18,43 +16,27 @@ namespace Trigger.Telemetry
         {
             Telemetry res = _telemetries.FirstOrDefault(t => string.Equals(item.Data.UserId, t.Data.UserId));
             if(res == null)
-            {
                 _telemetries.Add(item);
-            }
             else
-            {
                 res.Append(item);
-            }
         }
 
         public void Clear()
-        {
-            _telemetries.Clear();
-        }
+            => _telemetries.Clear();
 
         public bool Contains(Telemetry item)
-        {
-            return _telemetries.Contains(item);
-        }
+            => _telemetries.Contains(item);
 
         public void CopyTo(Telemetry[] array, int arrayIndex)
-        {
-            
-        }
+            => _telemetries.CopyTo(array, arrayIndex);
 
         public IEnumerator<Telemetry> GetEnumerator()
-        {
-            return _telemetries.GetEnumerator();
-        }
+            => _telemetries.GetEnumerator();
 
         public bool Remove(Telemetry item)
-        {
-            return _telemetries.Remove(item);
-        }
+            => _telemetries.Remove(item);
 
         IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _telemetries.GetEnumerator();
-        }
+            => _telemetries.GetEnumerator();
     }
 }

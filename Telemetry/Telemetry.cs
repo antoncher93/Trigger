@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Trigger.Telemetry.Interfaces;
 
 namespace Trigger.Telemetry
 {
@@ -64,6 +63,11 @@ namespace Trigger.Telemetry
             {
                 rssivalue = new RssiValue { Rssi = rssi, Time = time };
             }
+        }
+
+        public static implicit operator Telemetry(string s)
+        {
+            return JsonConvert.DeserializeObject<Telemetry>(s);
         }
     }
 

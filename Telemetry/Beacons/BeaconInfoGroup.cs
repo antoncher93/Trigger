@@ -34,7 +34,7 @@ namespace Trigger.Telemetry.Beacons
 
         public void CopyTo(BeaconInfo[] array, int arrayIndex)
         {
-            
+
         }
 
         public IEnumerator<BeaconInfo> GetEnumerator()
@@ -52,7 +52,7 @@ namespace Trigger.Telemetry.Beacons
             return beacons.GetEnumerator();
         }
 
-#endregion
+        #endregion
 
         public int SlideAverageCount
         {
@@ -68,12 +68,12 @@ namespace Trigger.Telemetry.Beacons
         public void SetRssiValue(Beacon beacon)
         {
             var foundbeacon = beacons.FirstOrDefault(b => string.Equals(b.MacAddress, beacon.Mac, StringComparison.CurrentCultureIgnoreCase));
-            if(foundbeacon == null)
+            if (foundbeacon == null)
             {
                 foundbeacon = new BeaconInfo(beacon.Mac);
                 this.Add(foundbeacon);
             }
-            
+
             foundbeacon.SetLastRssi(beacon.Rssi, beacon.DateTime);
         }
 
@@ -96,5 +96,77 @@ namespace Trigger.Telemetry.Beacons
                 return beacons.OrderByDescending(b => b.LastRssi).FirstOrDefault().LastRssi;
             }
         }
+
+        #region Operations
+        public static bool operator <(BeaconInfoGroup a, BeaconInfoGroup b)
+        {
+            if (a == null && b == null)
+                return false;
+
+            if (a == null && b != null)
+                return true;
+
+            if (a != null && b == null)
+                return false;
+
+            return a.MaxSlideRssi < b.MaxSlideRssi;
+        }
+
+        public static bool operator >(BeaconInfoGroup a, BeaconInfoGroup b)
+        {
+            if (a == null && b == null)
+                return false;
+
+            if (a == null && b != null)
+                return false;
+
+            if (a != null && b == null)
+                return true;
+
+            return a.MaxSlideRssi > b.MaxSlideRssi;
+        }
+
+        public static bool operator <=(BeaconInfoGroup a, BeaconInfoGroup b)
+        {
+            if (a == null && b == null)
+                return false;
+
+            if (a == null && b != null)
+                return true;
+
+            if (a != null && b == null)
+                return false;
+
+            return a.MaxSlideRssi <= b.MaxSlideRssi;
+        }
+
+        public static bool operator >=(BeaconInfoGroup a, BeaconInfoGroup b)
+        {
+            if (a == null && b == null)
+                return false;
+
+            if (a == null && b != null)
+                return false;
+
+            if (a != null && b == null)
+                return true;
+
+            return a.MaxSlideRssi >= b.MaxSlideRssi;
+        }
+
+        public static BeaconInfoGroup Max(params BeaconInfoGroup[] items)
+        {
+            if (items.Length == 0)
+                return null;
+
+            BeaconInfoGroup max = items[0];
+
+            foreach (var i in items)
+                if (i > max)
+                    max = i;
+
+            return max;
+        }
+        #endregion
     }
 }
