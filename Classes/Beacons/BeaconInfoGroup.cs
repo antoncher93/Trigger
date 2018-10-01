@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 
-namespace Trigger.Telemetry.Beacons
+namespace Trigger.Beacons
 {
     public class BeaconInfoGroup : ICollection<BeaconInfo>
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Timers;
 
-namespace Trigger.Telemetry.Beacons
+namespace Trigger.Beacons
 {
     public class BeaconInfo
     {

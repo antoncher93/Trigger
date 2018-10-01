@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Trigger.Telemetry.Beacons
+namespace Trigger.Beacons
 {
     public class BeaconBody : IBeaconBody
     {

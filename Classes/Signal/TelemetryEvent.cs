@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Trigger.Classes;
 
-namespace Trigger.Telemetry
+namespace Trigger.Signal
 {
     public class TriggerEventArgs : EventArgs
     {
-        public TriggerEventArgs(APoint apoint, DateTime time, string userId)
+        public TriggerEventArgs(AccessPoint apoint, DateTime time, string userId)
         {
             APoint = apoint;
             DateTime = time;
             UserId = userId;
         }
-        public APoint APoint { get; private set; }
+        public AccessPoint APoint { get; private set; }
         public DateTime DateTime { get; private set; }
         public string UserId { get; private set; }
     }

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace Trigger.Telemetry
+namespace Trigger.Interfaces
 {
     public interface IBeaconsTelemetry  //интерфейс общей телеметрии
     {

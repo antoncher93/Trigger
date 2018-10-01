@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Trigger.Telemetry
+namespace Trigger.Signal
 {
     public class TelemetryGroup : ICollection<Telemetry>
     {
