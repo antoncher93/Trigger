@@ -34,7 +34,7 @@ namespace Trigger.Telemetry.Beacons
         private List<Beacon> commonList;
 
         private APoint apoint;
-        private int slideAverageCount = 5;
+        //private int slideAverageCount = 5;
 
         public IList<TimeSpan?> PeakDistances { get; private set; }
         private Beacon lastbeacon;
@@ -85,10 +85,18 @@ namespace Trigger.Telemetry.Beacons
 
         public event EventHandler<TriggerEventArgs> EnterByPeaks;
 
+        private void CutTelemetry(Telemetry telemetry)
+        {
+            var time = telemetry.Data.LastSignalTime;
+
+            telemetry.Data.CleanBefore(time - TimeSpan.FromSeconds(60));
+        }
+
         public void CheckTelemetry(Telemetry telemetry)
         {
-            var res = telemetry.Data.APoints.FirstOrDefault(p => p.Uid == this.apoint.Uid);
+            CutTelemetry(telemetry);
 
+            var res = telemetry.Data.APoints.FirstOrDefault(p => p.Uid == this.apoint.Uid);
             if (res == null) return;
 
             var beacons = res.Beacons;
@@ -98,19 +106,8 @@ namespace Trigger.Telemetry.Beacons
 
             for (int i = 0; i < commonList.Count; i++)
             {
-                //RefreshBeaconInfo(commonList[i]);
-
                 RefreshBeaconInfoGroup(commonList[i]);
                 CheckSlideAverageRSSI(apoint, commonList[i]);
-                //if (Inside)
-                //{
-                //    CheckExit(apoint, commonList[i]);
-                //}
-                //else
-                //{
-                //    CheckEnter(apoint, commonList[i]);
-                //}
-
                 commonList.RemoveAt(i);
                 i--;
             }
@@ -118,25 +115,25 @@ namespace Trigger.Telemetry.Beacons
             CalcPeakDistances();
         }
 
-        private void ResetSlideRssiIfNeed(BeaconInfoGroup group, Beacon beacon, TimeSpan? timeoffset)
+        private void ResetSlideRssiIfNeed(BeaconInfoGroup group, Beacon beacon)
         {
             foreach( var b in group)
             {
-                if((beacon.DateTime - b.LastRssiTime )>=timeoffset)
+                if((beacon.DateTime - b.LastRssiTime )>= RangerSettings.BeaconLifeTime)
                 {
                     b.ResetSlideAverageRssi();
                 }
             }
         }
 
-        public void CheckSlideAverageRSSI(APoint apoint, Beacon beacon)
+        private void CheckSlideAverageRSSI(APoint apoint, Beacon beacon)
         {
             lastbeacon = beacon;
-            if(SecondLineInfo.MaxSlideRssi > GetMax(FirstLineInfo, HelpLineInfo).MaxSlideRssi)
+            if((SecondLineInfo.MaxSlideRssi - GetMax(FirstLineInfo, HelpLineInfo).MaxSlideRssi)>=5)
             {
                 Status = AppearStatus.Inside;
             }
-            else if(FirstLineInfo.MaxSlideRssi > SecondLineInfo.MaxSlideRssi)
+            else if((FirstLineInfo.MaxSlideRssi - SecondLineInfo.MaxSlideRssi)>=5)
             {
                 Status = AppearStatus.Outside;
             }
@@ -196,7 +193,7 @@ namespace Trigger.Telemetry.Beacons
                     if (res == null)
                     {
                         res = new BeaconInfo(beac.Mac);
-                        res.SlideAverageCount = slideAverageCount;
+                        res.SlideAverageCount = RangerSettings.SlideAverageCount;
                         group.Add(res);
                     }
                     res.SetLastRssi(beac.Rssi, beac.DateTime);
@@ -208,11 +205,11 @@ namespace Trigger.Telemetry.Beacons
             CheckBeacon(beacon, SecondLineBeacons, SecondLineInfo);
             CheckBeacon(beacon, HelpBeacons, HelpLineInfo);
 
-            TimeSpan? timeoffset = new TimeSpan?(new TimeSpan(0, 0, 2));
+            //TimeSpan? timeoffset = new TimeSpan?(new TimeSpan(0, 0, 2));
 
-            ResetSlideRssiIfNeed(FirstLineInfo, beacon, timeoffset);
-            ResetSlideRssiIfNeed(SecondLineInfo, beacon, timeoffset);
-            ResetSlideRssiIfNeed(HelpLineInfo, beacon, timeoffset);
+            ResetSlideRssiIfNeed(FirstLineInfo, beacon);
+            ResetSlideRssiIfNeed(SecondLineInfo, beacon);
+            ResetSlideRssiIfNeed(HelpLineInfo, beacon);
 
         }
 
@@ -224,7 +221,7 @@ namespace Trigger.Telemetry.Beacons
                 if (res == null)
                 {
                     res = new BeaconInfo(beacon.Mac);
-                    res.SlideAverageCount = slideAverageCount;
+                    res.SlideAverageCount = RangerSettings.SlideAverageCount;
                     foundBeacFirstLine.Add(res);
                 }
                 res.SetLastRssi(beacon.Rssi, beacon.DateTime);
@@ -239,7 +236,7 @@ namespace Trigger.Telemetry.Beacons
                 {
                     res = new BeaconInfo(beacon.Mac)
                     {
-                        SlideAverageCount = slideAverageCount
+                        SlideAverageCount = RangerSettings.SlideAverageCount
                     };
                     foundBeacSecondLine.Add(res);
                 }
@@ -255,7 +252,7 @@ namespace Trigger.Telemetry.Beacons
                 {
                     res = new BeaconInfo(beacon.Mac)
                     {
-                        SlideAverageCount = slideAverageCount
+                        SlideAverageCount = RangerSettings.SlideAverageCount
                     };
                     foundBeacHelpLine.Add(res);
                 }
@@ -297,6 +294,11 @@ namespace Trigger.Telemetry.Beacons
             }
         }
 
+        public void SetAPoint(string uid)
+        {
+            apoint = APoint.FromParse(uid);
+        }
+
         private void ResetAllSlideAverageRssi(IList<BeaconInfo> beacons)
         {
             for(int i = 0; i< beacons.Count; i++)
@@ -305,9 +307,6 @@ namespace Trigger.Telemetry.Beacons
             }
         }
 
-        public void SetSlideAverageCount(int _slideAverageCount)
-            => slideAverageCount = _slideAverageCount;
-        public void SetAPoint(APoint _apoint)
-            => apoint = _apoint;
+        
     }
 }

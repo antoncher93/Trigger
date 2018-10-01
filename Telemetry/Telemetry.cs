@@ -9,6 +9,7 @@ namespace Trigger.Telemetry
     {
         public int Type { get; set; }
         public TelemetryData Data { get; set; }
+        private DateTime _lastSignalTime;
 
         public void Append(Telemetry telemetry)
         {
@@ -62,7 +63,10 @@ namespace Trigger.Telemetry
             if(rssivalue == null)
             {
                 rssivalue = new RssiValue { Rssi = rssi, Time = time };
+                beacon.Values.Add(rssivalue);
+                _lastSignalTime = time;
             }
+            
         }
     }
 
@@ -71,6 +75,42 @@ namespace Trigger.Telemetry
         public string UserId { get; set; }
 
         public IList<APoint> APoints { get; set; }
+
+        public void CleanBefore(DateTime time)
+        {
+            for(int i = 0; i< APoints.Count; i++)
+            {
+                APoints[i].CleanBefore(time);
+
+                if(APoints[i].Beacons.Count == 0)
+                {
+                    APoints.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
+        public DateTime LastSignalTime
+        {
+            get
+            {
+                var time = APoints.FirstOrDefault().Beacons.FirstOrDefault().Values.FirstOrDefault().Time;
+                foreach(var apoint in APoints)
+                {
+                    foreach(var beacon in apoint.Beacons)
+                    {
+                        foreach(var rssivalue in beacon.Values)
+                        {
+                            if(rssivalue.Time > time)
+                            {
+                                time = rssivalue.Time;
+                            }
+                        }
+                    }
+                }
+                return time;
+            }
+        }
     }
 
     public class APoint
@@ -103,6 +143,22 @@ namespace Trigger.Telemetry
                 }
             }
         }
+
+        public void CleanBefore(DateTime time)
+        {
+            for(int i =0; i< Beacons.Count; i++)
+            {
+                Beacons[i].CleanBefore(time);
+
+                if(Beacons[i].Values.Count == 0)
+                {
+                    Beacons.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
+        
     }
 
     public class SingleBeaconTelemetry
@@ -117,6 +173,19 @@ namespace Trigger.Telemetry
                 Mac = mac,
                 Values = new List<RssiValue>()
             };
+        }
+
+        public void CleanBefore(DateTime time)
+        {
+            for(int i= 0; i< Values.Count; i++)
+            {
+                if(Values[i].Time < time)
+                {
+                    Values.RemoveAt(i);
+                    i--;
+                    
+                }
+            }
         }
 
         public void Append(SingleBeaconTelemetry beacon)

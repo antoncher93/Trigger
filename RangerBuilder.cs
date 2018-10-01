@@ -29,13 +29,13 @@ namespace Trigger
 
         public RangerBuilder SetCalcSlideAverageCount(int count)
         {
-            ranger.SetSlideAverageCount(count);
+            RangerSettings.SlideAverageCount = count;
             return this;
         }
 
         public RangerBuilder SetAPointUid(string uid)
         {
-            ranger.SetAPoint(new APoint { Uid = uid });
+            ranger.SetAPoint(uid);
             return this;
         }
 
