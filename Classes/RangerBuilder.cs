@@ -29,14 +29,8 @@ namespace Trigger
         public RangerBuilder SetAPointUid(string uid)
             => Modify(() => { ranger.apoint = new AccessPoint { Uid = uid }; });
 
-        public RangerBuilder SetUser(string userUid)
-            => Modify(() => { ranger._userUid = userUid.Trim(); });
-
         public Ranger Build()
-        {
-            if (string.IsNullOrWhiteSpace(ranger._userUid))
-                throw new ArgumentException("User undeclared!");
-            
+        {           
             return ranger;
         }
     }

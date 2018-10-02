@@ -27,7 +27,7 @@ namespace Trigger.Classes
                     SingleBeaconTelemetry res = Beacons.FirstOrDefault(b => string.Equals(b.Mac, beacon.Mac, StringComparison.CurrentCultureIgnoreCase));
                     if (res == null)
                     {
-                        this.Beacons.Add(beacon);
+                        Beacons.Add(beacon);
                     }
                     else
                     {
