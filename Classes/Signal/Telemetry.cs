@@ -11,6 +11,7 @@ namespace Trigger.Signal
     {
         public TelemetryType Type { get; set; } = TelemetryType.FromUser;
         public TelemetryData Data { get; set; }
+        private DateTime _lastSignalTime;
 
         public void Append(Telemetry telemetry)
         {
@@ -62,6 +63,8 @@ namespace Trigger.Signal
             if(rssivalue == null)
             {
                 rssivalue = new RssiValue { Rssi = rssi, Time = time };
+                beacon.Values.Add(rssivalue);
+                _lastSignalTime = time;
             }
         }
 
@@ -89,6 +92,19 @@ namespace Trigger.Signal
                 Mac = mac,
                 Values = new List<RssiValue>()
             };
+        }
+
+        public void CleanBefore(DateTime time)
+        {
+            for(int i= 0; i< Values.Count; i++)
+            {
+                if(Values[i].Time < time)
+                {
+                    Values.RemoveAt(i);
+                    i--;
+                    
+                }
+            }
         }
 
         public void Append(SingleBeaconTelemetry beacon)
