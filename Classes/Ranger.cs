@@ -9,14 +9,14 @@ using Trigger.Signal;
 
 namespace Trigger
 {
-    public class Ranger : IRangerEvents
+    public class Ranger : IRanger, ITriggerEvents
     {
         #region Variables
         internal int slideAverageCount = 5;
         internal List<IBeaconBody> _firstLineBeacons { get; private set; } = new List<IBeaconBody>();
         internal List<IBeaconBody> _secondLineBeacons { get; private set; } = new List<IBeaconBody>();
         internal List<IBeaconBody> _helpBeacons { get; private set; } = new List<IBeaconBody>();
-        internal string _userUid { get; set; }
+        private string _userUid { get; set; }
         internal AccessPoint apoint;
 
         private BeaconInfoGroup _firstLineInfo = new BeaconInfoGroup();
@@ -49,6 +49,8 @@ namespace Trigger
         #region Methods
         public void CheckTelemetry(Telemetry telemetry)
         {
+            _userUid = telemetry.Data.UserId;
+
             var beacons = telemetry?.Data.APoints
                 .FirstOrDefault(p => p.Uid == apoint.Uid).Beacons;
 
@@ -68,8 +70,15 @@ namespace Trigger
                 RefreshBeaconInfoGroup(beacon);
                 CheckSlideAverage(apoint, beacon);
             }
-
             commonList = null;
+
+            Flush();
+        }
+
+        private void Flush()
+        {
+            _status = AppearStatus.Unknown;
+            _userUid = "";
         }
 
         private void ResetSlideRssi(BeaconInfoGroup group, Beacon beacon, TimeSpan? timeoffset)
@@ -101,9 +110,9 @@ namespace Trigger
         {
             Action<Beacon, IList<IBeaconBody>, BeaconInfoGroup> CheckBeacon = (beac, line, group) =>
             {
-                if (line.Any(b => b.Mac == beac.Mac))
+                if (line.Any(b => string.Equals(b.Mac, beac.Mac, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    var res = group.FirstOrDefault(b => b.MacAddress == beacon.Mac);
+                    var res = group.FirstOrDefault(b => string.Equals(b.MacAddress, beacon.Mac, StringComparison.InvariantCultureIgnoreCase));
                     if (res == null)
                     {
                         res = new BeaconInfo(beac.Mac);
@@ -125,6 +134,11 @@ namespace Trigger
             ResetSlideRssi(_firstLineInfo, beacon, timeoffset);
             ResetSlideRssi(_secondLineInfo, beacon, timeoffset);
             ResetSlideRssi(_helpLineInfo, beacon, timeoffset);
+        }
+
+        public bool IsObsolete()
+        {
+            throw new NotImplementedException();
         }
         #endregion
     }

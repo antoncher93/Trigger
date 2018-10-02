@@ -15,10 +15,16 @@ namespace Trigger.Signal
         public void Add(Telemetry item)
         {
             Telemetry res = _telemetries.FirstOrDefault(t => string.Equals(item.Data.UserId, t.Data.UserId));
-            if(res == null)
+            if (res == null)
                 _telemetries.Add(item);
             else
                 res.Append(item);
+        }
+
+        public void Bind(IEnumerable<Telemetry> signals)
+        {
+            foreach (var s in signals)
+                Add(s);
         }
 
         public void Clear()

@@ -3,7 +3,7 @@ using Trigger.Signal;
 
 namespace Trigger.Interfaces
 {
-    public interface IRangerEvents
+    public interface ITriggerEvents
     {
         event EventHandler<TriggerEventArgs> OnEnter;
         event EventHandler<TriggerEventArgs> OnExit;
