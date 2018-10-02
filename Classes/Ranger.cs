@@ -103,7 +103,6 @@ namespace Trigger
             {
                 if (line.Any(b => b.Mac == beac.Mac))
                 {
-
                     var res = group.FirstOrDefault(b => b.MacAddress == beacon.Mac);
                     if (res == null)
                     {
