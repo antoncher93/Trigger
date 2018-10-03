@@ -1,0 +1,4 @@
+C:\Trigger\obj\Debug\netstandard1.0\Trigger.csprojAssemblyReference.cache
+C:\Trigger\obj\Debug\netstandard1.0\Trigger.csproj.CoreCompileInputs.cache
+C:\Trigger\obj\Debug\netstandard1.0\Trigger.AssemblyInfoInputs.cache
+C:\Trigger\obj\Debug\netstandard1.0\Trigger.AssemblyInfo.cs

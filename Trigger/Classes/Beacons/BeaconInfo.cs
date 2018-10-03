@@ -32,8 +32,6 @@ namespace Trigger.Beacons
             count = 0;
 
             slideCollect = new List<int>();
-
-          
         }
 
         public void ResetSlideAverageRssi()
@@ -65,10 +63,6 @@ namespace Trigger.Beacons
             {
                 if (Peak == null || Peak.Rssi < SlideAverageRssi)
                 {
-                    //if(MacAddress == "E3:25:3E:0A:7E:4C")
-                    //{
-
-                    //}
                     Peak = new RssiPeak { Rssi = SlideAverageRssi, Time = time };
                 }
             }

@@ -24,6 +24,8 @@ namespace Trigger
         private BeaconInfoGroup _helpLineInfo = new BeaconInfoGroup();
         private Beacon _lastBeacon;
         private AppearStatus _status = AppearStatus.Unknown;
+
+        private TimeSpan timeOffset = new TimeSpan(0, 0, 2);
         #endregion
 
         private AppearStatus Status
@@ -49,12 +51,12 @@ namespace Trigger
         #region Methods
         public void CheckTelemetry(Telemetry telemetry)
         {
-            _userUid = telemetry.Data.UserId;
+            _userUid = telemetry.UserId;
 
-            var beacons = telemetry?.Data.APoints
-                .FirstOrDefault(p => p.Uid == apoint.Uid).Beacons;
+            //var beacons = telemetry?.Data.APoints
+            //    .FirstOrDefault(p => p.Uid == apoint.Uid).Beacons;
 
-            IEnumerable<Beacon> commonList = beacons
+            IEnumerable<Beacon> commonList = telemetry[apoint.Uid].Beacons
                 .SelectMany(s => 
                     s.Values.Select(v => 
                         new Beacon {
@@ -70,8 +72,8 @@ namespace Trigger
                 RefreshBeaconInfoGroup(beacon);
                 CheckSlideAverage(apoint, beacon);
             }
-            commonList = null;
 
+            commonList = null;
             Flush();
         }
 
@@ -81,14 +83,13 @@ namespace Trigger
             _userUid = "";
         }
 
-        private void ResetSlideRssi(BeaconInfoGroup group, Beacon beacon, TimeSpan? timeoffset)
+        private void ResetSlideRssi(BeaconInfoGroup group, Beacon beacon)
         {
-            Parallel.ForEach(group, (g) => {
-                if ((beacon.DateTime - g.LastRssiTime) >= timeoffset)
-                {
+            foreach (var g in group)
+            {
+               if ((beacon.DateTime - g.LastRssiTime) >= timeOffset)
                     g.ResetSlideAverageRssi();
-                }
-            });
+            }
         }
 
         /// <summary>
@@ -108,32 +109,30 @@ namespace Trigger
 
         private void RefreshBeaconInfoGroup(Beacon beacon)
         {
-            Action<Beacon, IList<IBeaconBody>, BeaconInfoGroup> CheckBeacon = (beac, line, group) =>
+            Action<IList<IBeaconBody>, BeaconInfoGroup> CheckBeacon = (line, group) =>
             {
-                if (line.Any(b => string.Equals(b.Mac, beac.Mac, StringComparison.InvariantCultureIgnoreCase)))
+                if (line.Any(b => string.Equals(b.Mac, beacon.Mac, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     var res = group.FirstOrDefault(b => string.Equals(b.MacAddress, beacon.Mac, StringComparison.InvariantCultureIgnoreCase));
                     if (res == null)
                     {
-                        res = new BeaconInfo(beac.Mac);
+                        res = new BeaconInfo(beacon.Mac);
                         res.SlideAverageCount = slideAverageCount;
                         group.Add(res);
                     }
-                    res.SetLastRssi(beac.Rssi, beac.DateTime);
+                    res.SetLastRssi(beacon.Rssi, beacon.DateTime);
 
                     return;
                 }
             };
 
-            CheckBeacon(beacon, _firstLineBeacons, _firstLineInfo);
-            CheckBeacon(beacon, _secondLineBeacons, _secondLineInfo);
-            CheckBeacon(beacon, _helpBeacons, _helpLineInfo);
+            CheckBeacon(_firstLineBeacons, _firstLineInfo);
+            CheckBeacon(_secondLineBeacons, _secondLineInfo);
+            CheckBeacon(_helpBeacons, _helpLineInfo);
 
-            TimeSpan? timeoffset = new TimeSpan?(new TimeSpan(0, 0, 2));
-
-            ResetSlideRssi(_firstLineInfo, beacon, timeoffset);
-            ResetSlideRssi(_secondLineInfo, beacon, timeoffset);
-            ResetSlideRssi(_helpLineInfo, beacon, timeoffset);
+            ResetSlideRssi(_firstLineInfo, beacon);
+            ResetSlideRssi(_secondLineInfo, beacon);
+            ResetSlideRssi(_helpLineInfo, beacon);
         }
 
         public bool IsObsolete()

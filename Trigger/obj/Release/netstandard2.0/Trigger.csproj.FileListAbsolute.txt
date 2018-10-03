@@ -1,0 +1,9 @@
+C:\Trigger\bin\Release\netstandard2.0\Trigger.deps.json
+C:\Trigger\bin\Release\netstandard2.0\Trigger.dll
+C:\Trigger\bin\Release\netstandard2.0\Trigger.pdb
+C:\Trigger\obj\Release\netstandard2.0\Trigger.csprojAssemblyReference.cache
+C:\Trigger\obj\Release\netstandard2.0\Trigger.csproj.CoreCompileInputs.cache
+C:\Trigger\obj\Release\netstandard2.0\Trigger.AssemblyInfoInputs.cache
+C:\Trigger\obj\Release\netstandard2.0\Trigger.AssemblyInfo.cs
+C:\Trigger\obj\Release\netstandard2.0\Trigger.dll
+C:\Trigger\obj\Release\netstandard2.0\Trigger.pdb

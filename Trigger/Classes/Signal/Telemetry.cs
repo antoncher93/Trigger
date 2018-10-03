@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Trigger.Classes;
@@ -7,28 +8,46 @@ using Trigger.Enums;
 
 namespace Trigger.Signal
 {
-    public class Telemetry
+    public class Telemetry : Dictionary<string, AccessPoint>
     {
+        [JsonProperty(Order = 1)]
+        public string UserId { get; set; }
+
+        public Telemetry Add(AccessPoint point)
+        {
+            Add(point.Uid, point);
+            return this;
+        }
+
+        public Telemetry AddRange(params AccessPoint[] points)
+        {
+            foreach (var p in points)
+                Add(p.Uid, p);
+
+            return this;
+        }
+
         public TelemetryType Type { get; set; } = TelemetryType.FromUser;
-        public TelemetryData Data { get; set; }
+
         private DateTime _lastSignalTime;
 
         public void Append(Telemetry telemetry)
         {
-            if(string.Equals(telemetry.Data.UserId, this.Data.UserId, StringComparison.CurrentCulture))
+            if (!string.Equals(telemetry.UserId, UserId, StringComparison.CurrentCulture))
+                return;
+
+            foreach (var apoint in telemetry)
             {
-                foreach(var apoint in telemetry.Data.APoints)
-                {
-                    AccessPoint res = Data.APoints.FirstOrDefault(ap => string.Equals(ap.Uid, apoint.Uid));
-                    if(res == null)
-                    {
-                        Data.APoints.Add(apoint);
-                    }
-                    else
-                    {
-                        res.Append(apoint);
-                    }
-                } 
+                this[apoint.Key].Append(apoint.Value);
+                //AccessPoint res = Data.FirstOrDefault(ap => string.Equals(ap.Uid, apoint.Uid));
+                //if(res == null)
+                //{
+                //    Data.APoints.Add(apoint);
+                //}
+                //else
+                //{
+                //    res.Append(apoint);
+                //}
             }
         }
 
@@ -37,30 +56,33 @@ namespace Trigger.Signal
             return new Telemetry
             {
                 Type = TelemetryType.FromUser,
-                Data = new TelemetryData
-                {
+
                     UserId = userId
-                }
+   
             };
         }
 
         public void NewBeacon(string mac, int rssi, string apointUid, DateTime time)
         {
-            var apoint = Data.APoints.FirstOrDefault(ap => ap.Uid == apointUid);
-            if(apoint == null)
-            {
-                apoint = AccessPoint.FromUid(apointUid);
-                Data.APoints.Add(apoint);
-            }
+            if (this[apointUid] == null)
+                this[apointUid] = AccessPoint.FromUid(apointUid);
+
+            AccessPoint apoint = this[apointUid];
+            //var apoint = Data.FirstOrDefault(ap => ap.Value.Uid == apointUid).Value;
+            //if(apoint == null)
+            //{
+            //    apoint = AccessPoint.FromUid(apointUid);
+            //    Data.Add(apoint);
+            //}
 
             var beacon = apoint.Beacons.FirstOrDefault(b => b.Mac == mac);
-            if(beacon == null)
+            if (beacon == null)
             {
                 beacon = SingleBeaconTelemetry.FromMac(mac);
                 apoint.Beacons.Add(beacon);
             }
             var rssivalue = beacon.Values.FirstOrDefault(v => v.Time == time);
-            if(rssivalue == null)
+            if (rssivalue == null)
             {
                 rssivalue = new RssiValue { Rssi = rssi, Time = time };
                 beacon.Values.Add(rssivalue);
@@ -72,12 +94,6 @@ namespace Trigger.Signal
         {
             return JsonConvert.DeserializeObject<Telemetry>(s);
         }
-    }
-
-    public class TelemetryData
-    {
-        public string UserId { get; set; }
-        public IList<AccessPoint> APoints { get; set; } = new List<AccessPoint>();
     }
 
     public class SingleBeaconTelemetry
@@ -96,24 +112,24 @@ namespace Trigger.Signal
 
         public void CleanBefore(DateTime time)
         {
-            for(int i= 0; i< Values.Count; i++)
+            for (int i = 0; i < Values.Count; i++)
             {
-                if(Values[i].Time < time)
+                if (Values[i].Time < time)
                 {
                     Values.RemoveAt(i);
                     i--;
-                    
+
                 }
             }
         }
 
         public void Append(SingleBeaconTelemetry beacon)
         {
-            if(string.Equals(this.Mac, beacon.Mac, StringComparison.CurrentCultureIgnoreCase))
+            if (string.Equals(this.Mac, beacon.Mac, StringComparison.CurrentCultureIgnoreCase))
             {
-                foreach(var rssi in beacon.Values)
+                foreach (var rssi in beacon.Values)
                 {
-                    if(!this.Values.Any(b => b.Time.Equals(rssi.Time)))
+                    if (!this.Values.Any(b => b.Time.Equals(rssi.Time)))
                     {
                         this.Values.Add(rssi);
                     }
