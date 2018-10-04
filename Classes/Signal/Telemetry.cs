@@ -70,7 +70,7 @@ namespace Trigger.Signal
 
         public static implicit operator Telemetry(string s)
         {
-            return JsonConvert.DeserializeObject<Telemetry>(s);
+               return JsonConvert.DeserializeObject<Telemetry>(s);
         }
     }
 

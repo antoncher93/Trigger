@@ -65,11 +65,18 @@ namespace Trigger
                 .OrderBy(s => s.DateTime)
                 .ToList();
 
+            _lastBeacon = commonList.FirstOrDefault();
+
             foreach (var beacon in commonList)
             {
+                if (!DateTime.Equals(beacon.DateTime, _lastBeacon.DateTime))
+                {
+                    CheckSlideAverage(apoint, beacon);
+                }
                 RefreshBeaconInfoGroup(beacon);
-                CheckSlideAverage(apoint, beacon);
             }
+            CheckSlideAverage(apoint, _lastBeacon);
+
             commonList = null;
 
             Flush();
@@ -108,6 +115,8 @@ namespace Trigger
 
         private void RefreshBeaconInfoGroup(Beacon beacon)
         {
+            _lastBeacon = beacon;
+
             Action<Beacon, IList<IBeaconBody>, BeaconInfoGroup> CheckBeacon = (beac, line, group) =>
             {
                 if (line.Any(b => string.Equals(b.Mac, beac.Mac, StringComparison.InvariantCultureIgnoreCase)))
