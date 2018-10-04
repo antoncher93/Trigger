@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Trigger.Interfaces;
 using Trigger.Signal;
 using Xunit;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Trigger.Classes;
 
 namespace Trigger.Test
 {
@@ -30,7 +29,6 @@ namespace Trigger.Test
         [MemberData(nameof(DataSource.GetTelemerty_10x6), MemberType = typeof(DataSource))]
         public void Test_Stress_Check(TelemetryGroup group)
         {
-            string r = JsonConvert.SerializeObject(group.First().Value);
             // Prepare
             IObjectPool<string, Ranger> pool = GetNewPool();
 

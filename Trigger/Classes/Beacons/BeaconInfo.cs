@@ -8,7 +8,7 @@ namespace Trigger.Beacons
     public class BeaconInfo
     {
         public string MacAddress { get; private set; }
-        public double LastRssi { get; private set; }
+        public int LastRssi { get; private set; }
         public double AverageRssi { get; private set; }
         public double MaxRssi { get; private set; }
         public double SlideAverageRssi { get; private set; }
@@ -40,30 +40,30 @@ namespace Trigger.Beacons
             slideCollect.Clear();
         }
 
-        public void SetLastRssi(int value, DateTime time)
+        public void SetLastRssi(BeaconItem info)
         {
             count++;
            
-            LastRssi = value;
-            LastRssiTime = time;
+            LastRssi = info.Rssi;
+            LastRssiTime = info.Time;
 
-            if (value > MaxRssi) MaxRssi = value;
+            if (LastRssi > MaxRssi) MaxRssi = LastRssi;
 
-            AverageRssi = ((AverageRssi * (count - 1)) + value) / count;
+            AverageRssi = ((AverageRssi * (count - 1)) + LastRssi) / count;
 
             if (slideCollect.Count >= SlideAverageCount)
             {
                 slideCollect.RemoveAt(0);
             }
 
-            slideCollect.Add(value);
+            slideCollect.Add(LastRssi);
             SlideAverageRssi = CalcSlideAverageRssi();
 
             if (slideCollect.Count > 1 && SlideAverageRssi < slideCollect[slideCollect.Count - 1])
             {
                 if (Peak == null || Peak.Rssi < SlideAverageRssi)
                 {
-                    Peak = new RssiPeak { Rssi = SlideAverageRssi, Time = time };
+                    Peak = new RssiPeak { Rssi = SlideAverageRssi, Time = LastRssiTime };
                 }
             }
            

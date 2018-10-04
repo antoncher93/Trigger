@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Trigger.Beacons;
 using Trigger.Classes;
+using Trigger.Classes.Beacons;
 using Trigger.Interfaces;
 using Trigger.Signal;
 
@@ -22,7 +22,7 @@ namespace Trigger
         private BeaconInfoGroup _firstLineInfo = new BeaconInfoGroup();
         private BeaconInfoGroup _secondLineInfo = new BeaconInfoGroup();
         private BeaconInfoGroup _helpLineInfo = new BeaconInfoGroup();
-        private Beacon _lastBeacon;
+        private BeaconItem _lastBeacon;
         private AppearStatus _status = AppearStatus.Unknown;
 
         private TimeSpan timeOffset = new TimeSpan(0, 0, 2);
@@ -36,9 +36,9 @@ namespace Trigger
                 if (_status != AppearStatus.Unknown && _status != value)
                 {
                     if (value == AppearStatus.Inside)
-                        OnEnter?.Invoke(this, new TriggerEventArgs(apoint, _lastBeacon.DateTime, _userUid));
+                        OnEnter?.Invoke(this, new TriggerEventArgs(apoint, _lastBeacon.Time, _userUid));
                     else
-                        OnExit?.Invoke(this, new TriggerEventArgs(apoint, _lastBeacon.DateTime, _userUid));
+                        OnExit?.Invoke(this, new TriggerEventArgs(apoint, _lastBeacon.Time, _userUid));
                 }
 
                 _status = value;
@@ -53,27 +53,13 @@ namespace Trigger
         {
             _userUid = telemetry.UserId;
 
-            //var beacons = telemetry?.Data.APoints
-            //    .FirstOrDefault(p => p.Uid == apoint.Uid).Beacons;
-
-            IEnumerable<Beacon> commonList = telemetry[apoint.Uid].Beacons
-                .SelectMany(s => 
-                    s.Values.Select(v => 
-                        new Beacon {
-                            Mac = s.Mac,
-                            Rssi = v.Rssi,
-                            DateTime = v.Time
-                        }))
-                .OrderBy(s => s.DateTime)
-                .ToList();
-
-            foreach (var beacon in commonList)
+            foreach (var beacon in telemetry[apoint.Uid].Beacons)
             {
                 RefreshBeaconInfoGroup(beacon);
-                CheckSlideAverage(apoint, beacon);
+                CheckSlideAverage(apoint, beacon.LastItem);
             }
 
-            commonList = null;
+           // commonList = null;
             Flush();
         }
 
@@ -87,7 +73,7 @@ namespace Trigger
         {
             foreach (var g in group)
             {
-               if ((beacon.DateTime - g.LastRssiTime) >= timeOffset)
+               if ((beacon.LastItem.Time - g.LastRssiTime) >= timeOffset)
                     g.ResetSlideAverageRssi();
             }
         }
@@ -97,7 +83,7 @@ namespace Trigger
         /// </summary>
         /// <param name="apoint"></param>
         /// <param name="beacon"></param>
-        private void CheckSlideAverage(AccessPoint apoint, Beacon beacon)
+        private void CheckSlideAverage(AccessPoint apoint, BeaconItem beacon)
         {
             _lastBeacon = beacon;
 
@@ -120,7 +106,7 @@ namespace Trigger
                         res.SlideAverageCount = slideAverageCount;
                         group.Add(res);
                     }
-                    res.SetLastRssi(beacon.Rssi, beacon.DateTime);
+                    res.SetLastRssi(beacon.LastItem);
 
                     return;
                 }

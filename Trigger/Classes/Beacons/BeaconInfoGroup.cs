@@ -65,16 +65,21 @@ namespace Trigger.Beacons
             SlideAverageCount = 3;
         }
 
-        public void SetRssiValue(Beacon beacon)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="macAddress">Beacon mac</param>
+        /// <param name="beacon"></param>
+        public void SetRssiValue(string macAddress, BeaconItem beacon)
         {
-            var foundbeacon = beacons.FirstOrDefault(b => string.Equals(b.MacAddress, beacon.Mac, StringComparison.CurrentCultureIgnoreCase));
+            var foundbeacon = beacons.FirstOrDefault(b => string.Equals(b.MacAddress, macAddress, StringComparison.CurrentCultureIgnoreCase));
             if (foundbeacon == null)
             {
-                foundbeacon = new BeaconInfo(beacon.Mac);
+                foundbeacon = new BeaconInfo(macAddress);
                 this.Add(foundbeacon);
             }
 
-            foundbeacon.SetLastRssi(beacon.Rssi, beacon.DateTime);
+            foundbeacon.SetLastRssi(beacon);
         }
 
         public double MaxSlideRssi
