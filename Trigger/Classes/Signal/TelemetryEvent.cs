@@ -11,6 +11,7 @@ namespace Trigger.Signal
             DateTime = time;
             UserId = userId;
         }
+
         public AccessPoint APoint { get; private set; }
         public DateTime DateTime { get; private set; }
         public string UserId { get; private set; }
