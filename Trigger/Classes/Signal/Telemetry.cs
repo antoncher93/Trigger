@@ -1,16 +1,19 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Trigger.Beacons;
 using Trigger.Classes;
+using Trigger.Classes.Beacons;
 using Trigger.Enums;
 
 namespace Trigger.Signal
 {
     public class Telemetry : Dictionary<string, AccessPoint>
     {
-        [JsonProperty(Order = 1)]
+        [JsonProperty(Order = 1)]  
         public string UserId { get; set; }
 
         public Telemetry Add(AccessPoint point)
@@ -28,6 +31,14 @@ namespace Trigger.Signal
         }
 
         public TelemetryType Type { get; set; } = TelemetryType.FromUser;
+
+        public DateTime MinDateTime
+        {
+            get
+            {
+                return Values.SelectMany(a => a.Beacons.SelectMany(b => b.Select(bi => bi.Time))).Min();
+            }
+        }
 
         private DateTime _lastSignalTime;
 
@@ -78,69 +89,23 @@ namespace Trigger.Signal
             var beacon = apoint.Beacons.FirstOrDefault(b => b.Mac == mac);
             if (beacon == null)
             {
-                beacon = SingleBeaconTelemetry.FromMac(mac);
+                beacon = Beacon.FromMac(mac);
                 apoint.Beacons.Add(beacon);
             }
-            var rssivalue = beacon.Values.FirstOrDefault(v => v.Time == time);
-            if (rssivalue == null)
-            {
-                rssivalue = new RssiValue { Rssi = rssi, Time = time };
-                beacon.Values.Add(rssivalue);
-                _lastSignalTime = time;
-            }
+
+            beacon.Add(new BeaconItem { Rssi = rssi, Time = time });
+          //  var rssivalue = beacon.FirstOrDefault(v => v.Time == time);
+         //   if (rssivalue == null)
+         //   {
+          //      rssivalue = new BeaconItem { Rssi = rssi, Time = time };
+          //      beacon.Add(rssivalue);
+          //      _lastSignalTime = time;
+          //  }
         }
 
         public static implicit operator Telemetry(string s)
         {
             return JsonConvert.DeserializeObject<Telemetry>(s);
         }
-    }
-
-    public class SingleBeaconTelemetry
-    {
-        public string Mac { get; set; }
-        public IList<RssiValue> Values { get; set; }
-
-        public static SingleBeaconTelemetry FromMac(string mac)
-        {
-            return new SingleBeaconTelemetry
-            {
-                Mac = mac,
-                Values = new List<RssiValue>()
-            };
-        }
-
-        public void CleanBefore(DateTime time)
-        {
-            for (int i = 0; i < Values.Count; i++)
-            {
-                if (Values[i].Time < time)
-                {
-                    Values.RemoveAt(i);
-                    i--;
-
-                }
-            }
-        }
-
-        public void Append(SingleBeaconTelemetry beacon)
-        {
-            if (string.Equals(this.Mac, beacon.Mac, StringComparison.CurrentCultureIgnoreCase))
-            {
-                foreach (var rssi in beacon.Values)
-                {
-                    if (!this.Values.Any(b => b.Time.Equals(rssi.Time)))
-                    {
-                        this.Values.Add(rssi);
-                    }
-                }
-            }
-        }
-    }
-
-    public class RssiValue
-    {
-        public int Rssi { get; set; }
-        public DateTime Time { get; set; }
     }
 }

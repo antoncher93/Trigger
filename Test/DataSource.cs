@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using Trigger.Beacons;
 using Trigger.Classes;
+using Trigger.Classes.Beacons;
 using Trigger.Signal;
 
 namespace Trigger.Test
@@ -25,143 +26,132 @@ namespace Trigger.Test
                                  new AccessPoint
                                  {
                                       Uid = NewGuid(),
-                                      Beacons = new []
+                                      Beacons = new Beacon[]
                                       {
-                                          new SingleBeaconTelemetry
+                                          new Beacon
                                           {
-                                               Mac = "00:00:00:00:00:00",
-                                               Values = new [] {
-                                                    new RssiValue {
+                                               Mac = "c9:18:b1:cf:9b:50",
+                                          }.Add(
+                                              new BeaconItem {
                                                         Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
+                                                        Time = RandDateTime(rand)
                                                     },
-                                                    new RssiValue {
+                                                    new BeaconItem {
                                                         Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
+                                                        Time = RandDateTime(rand)
                                                     },
-                                                    new RssiValue {
+                                                    new BeaconItem {
                                                         Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
+                                                        Time = RandDateTime(rand)
                                                     },
-                                                    new RssiValue {
+                                                    new BeaconItem {
                                                         Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
+                                                        Time = RandDateTime(rand)
                                                     },
-                                                    new RssiValue {
+                                                    new BeaconItem {
                                                         Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-
-                                                }
-                                          },
-                                          new SingleBeaconTelemetry
+                                                        Time = RandDateTime(rand)
+                                                    }),
+                                          new Beacon
                                           {
-                                               Mac = "00:00:00:00:00:01",
-                                               Values = new [] {
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
+                                               Mac = "e3:25:3e:0a:7e:4c",
 
-                                                }
-                                          },
-                                          new SingleBeaconTelemetry
+                                          }.Add(
+                                              new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    },
+                                                    new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    },
+                                                    new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    },
+                                                    new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    },
+                                                    new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    }),
+                                          new Beacon
                                           {
-                                               Mac = "00:00:00:00:00:02",
-                                               Values = new [] {
-                                                    new RssiValue {
+                                               Mac = "de:a6:78:08:52:a2",
+                                          }.Add(
+                                              new BeaconItem {
                                                         Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
+                                                        Time = RandDateTime(rand)
                                                     },
-                                                    new RssiValue {
+                                                    new BeaconItem {
                                                         Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
+                                                        Time = RandDateTime(rand)
                                                     },
-                                                    new RssiValue {
+                                                    new BeaconItem {
                                                         Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
+                                                        Time = RandDateTime(rand)
                                                     },
-                                                    new RssiValue {
+                                                    new BeaconItem {
                                                         Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
+                                                        Time = RandDateTime(rand)
                                                     },
-                                                    new RssiValue {
+                                                    new BeaconItem {
                                                         Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-
-                                                }
-                                          },
-                                          new SingleBeaconTelemetry
+                                                        Time = RandDateTime(rand)
+                                                    }),
+                                          new Beacon
                                           {
-                                               Mac = "00:00:00:00:00:03",
-                                               Values = new [] {
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
+                                               Mac = "c1:11:11:1b:11:1a"
 
-                                                }
-                                          },
-                                          new SingleBeaconTelemetry
+                                          }.Add(
+                                              new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    },
+                                                    new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    },
+                                                    new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    },
+                                                    new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    },
+                                                    new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    }),
+                                          new Beacon
                                           {
-                                               Mac = "00:00:00:00:00:04",
-                                               Values = new [] {
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
-                                                    new RssiValue {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = DateTime.Now
-                                                    },
+                                               Mac = "fd:3a:73:b7:54:ba"
 
-                                                }
                                           }
+                                          .Add(
+                                              new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    },
+                                                    new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    },
+                                                    new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    },
+                                                    new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    },
+                                                    new BeaconItem {
+                                                        Rssi = - rand.Next(20, 140),
+                                                        Time = RandDateTime(rand)
+                                                    })
                                       }
                                  }
                         }));
@@ -170,6 +160,12 @@ namespace Trigger.Test
             };
 
             yield return new[] { a() };
+        }
+
+        private static DateTime RandDateTime(Random rand)
+        {
+            return DateTime.Now.AddSeconds(rand.Next(-1000, 1000))
+                .AddMilliseconds(rand.Next(-1000, 1000));
         }
 
         private static string NewGuid()
