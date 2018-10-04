@@ -18,7 +18,7 @@ namespace Trigger.Classes.Beacons
 
         public BeaconItem LastItem => this.OrderByDescending(i => i.Time).FirstOrDefault();
 
-        public int Count => throw new NotImplementedException();
+        public int Count => _items.Count;
 
         public bool IsReadOnly => throw new NotImplementedException();
 
