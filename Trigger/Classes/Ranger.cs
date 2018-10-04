@@ -53,10 +53,13 @@ namespace Trigger
         {
             _userUid = telemetry.UserId;
 
-            foreach (var beacon in telemetry[apoint.Uid].Beacons)
+            var data = telemetry[apoint.Uid].Beacons.SelectMany(b => b.Select(bi => new { mac = b.Mac, Item = bi })).OrderBy(x => x.Item.Time);
+
+            foreach (var beacon in data)
             {
-                RefreshBeaconInfoGroup(beacon);
-                CheckSlideAverage(apoint, beacon.LastItem);
+                RefreshBeaconInfoGroup(beacon.mac, beacon.Item);
+
+              //  CheckSlideAverage(apoint, beacon.LastItem);
             }
 
            // commonList = null;
@@ -69,11 +72,11 @@ namespace Trigger
             _userUid = "";
         }
 
-        private void ResetSlideRssi(BeaconInfoGroup group, Beacon beacon)
+        private void ResetSlideRssi(BeaconInfoGroup group, DateTime time)
         {
             foreach (var g in group)
             {
-               if ((beacon.LastItem.Time - g.LastRssiTime) >= timeOffset)
+               if ((time - g.LastRssiTime) >= timeOffset)
                     g.ResetSlideAverageRssi();
             }
         }
@@ -93,20 +96,29 @@ namespace Trigger
                 Status = AppearStatus.Outside;
         }
 
-        private void RefreshBeaconInfoGroup(Beacon beacon)
+        private void RefreshBeaconInfoGroup(string macAddr, BeaconItem beacon)
         {
+            bool flag = false;
+
             Action<IList<IBeaconBody>, BeaconInfoGroup> CheckBeacon = (line, group) =>
             {
-                if (line.Any(b => string.Equals(b.Mac, beacon.Mac, StringComparison.InvariantCultureIgnoreCase)))
+                if (flag)
+                    return;
+
+                if (line.Any(b => string.Equals(b.Mac, macAddr, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    var res = group.FirstOrDefault(b => string.Equals(b.MacAddress, beacon.Mac, StringComparison.InvariantCultureIgnoreCase));
+                    flag = true;
+
+                    var res = group.FirstOrDefault(b => string.Equals(b.MacAddress, macAddr, StringComparison.InvariantCultureIgnoreCase));
                     if (res == null)
                     {
-                        res = new BeaconInfo(beacon.Mac);
+                        res = new BeaconInfo(macAddr);
                         res.SlideAverageCount = slideAverageCount;
                         group.Add(res);
                     }
-                    res.SetLastRssi(beacon.LastItem);
+                    res.SetLastRssi(beacon);
+
+                    ResetSlideRssi(group, beacon.Time);
 
                     return;
                 }
@@ -116,9 +128,9 @@ namespace Trigger
             CheckBeacon(_secondLineBeacons, _secondLineInfo);
             CheckBeacon(_helpBeacons, _helpLineInfo);
 
-            ResetSlideRssi(_firstLineInfo, beacon);
-            ResetSlideRssi(_secondLineInfo, beacon);
-            ResetSlideRssi(_helpLineInfo, beacon);
+            //ResetSlideRssi(_firstLineInfo, beacon);
+            //ResetSlideRssi(_secondLineInfo, beacon);
+            //ResetSlideRssi(_helpLineInfo, beacon);
         }
 
         public bool IsObsolete()
