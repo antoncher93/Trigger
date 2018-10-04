@@ -2,8 +2,12 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/obj
-/bin/Debug/netstandard2.0
+/Trigger/obj/
+/Trigger/bin/
+/Test/obj/
+/Test/bin/
 /.vs
 /packages/
 !packages/repositories.config
+
+
