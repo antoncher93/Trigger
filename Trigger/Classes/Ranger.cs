@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Trigger.Beacons;
@@ -109,8 +108,7 @@ namespace Trigger
                     var res = group.FirstOrDefault(b => string.Equals(b.MacAddress, macAddr, StringComparison.InvariantCultureIgnoreCase));
                     if (res == null)
                     {
-                        res = new BeaconInfo(macAddr);
-                        res.SlideAverageCount = slideAverageCount;
+                        res = new BeaconInfo(macAddr) { SlideAverageCount = slideAverageCount };
                         group.Add(res);
                     }
                     res.SetLastRssi(beacon);
@@ -124,10 +122,6 @@ namespace Trigger
             CheckBeacon(_firstLineBeacons, _firstLineInfo);
             CheckBeacon(_secondLineBeacons, _secondLineInfo);
             CheckBeacon(_helpBeacons, _helpLineInfo);
-
-            //ResetSlideRssi(_firstLineInfo, beacon);
-            //ResetSlideRssi(_secondLineInfo, beacon);
-            //ResetSlideRssi(_helpLineInfo, beacon);
         }
 
         public bool IsObsolete()
