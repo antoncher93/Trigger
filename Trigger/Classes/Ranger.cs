@@ -1,15 +1,16 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Trigger.Beacons;
 using Trigger.Classes;
-using Trigger.Classes.Beacons;
+using Trigger.Enums;
 using Trigger.Interfaces;
 using Trigger.Signal;
 
 namespace Trigger
 {
-    public class Ranger : IRanger, ITriggerEvents
+    public class Ranger : IRanger
     {
         #region Variables
         internal int slideAverageCount = 5;
@@ -28,41 +29,37 @@ namespace Trigger
         private TimeSpan timeOffset = new TimeSpan(0, 0, 2);
         #endregion
 
-        private AppearStatus Status
+        internal void ChangeStatus(AppearStatus value)
         {
-            get => _status;
-            set
-            {
-                if (_status != AppearStatus.Unknown && _status != value)
+            if (_status != AppearStatus.Unknown && _status != value)
+                OnEvent?.Invoke(this, new TriggerEventArgs
                 {
-                    if (value == AppearStatus.Inside)
-                        OnEnter?.Invoke(this, new TriggerEventArgs(apoint, _lastBeacon.Time, _userUid));
-                    else
-                        OnExit?.Invoke(this, new TriggerEventArgs(apoint, _lastBeacon.Time, _userUid));
-                }
+                    AccessPointUid = apoint.Uid,
+                    DateTime = _lastBeacon.Time,
+                    UserId = _userUid,
+                    Type = (value == AppearStatus.Inside ? TriggerEventType.Enter : TriggerEventType.Exit)
+                });
 
-                _status = value;
-            }
+            _status = value;
         }
 
-        public event EventHandler<TriggerEventArgs> OnEnter;
-        public event EventHandler<TriggerEventArgs> OnExit;
+        public event EventHandler<TriggerEventArgs> OnEvent;
 
         #region Methods
         public void CheckTelemetry(Telemetry telemetry)
         {
             _userUid = telemetry.UserId;
 
-            var data = telemetry[apoint.Uid].Beacons.SelectMany(b => b.Select(bi => new { mac = b.Mac, Item = bi })).OrderBy(x => x.Item.Time);
+            var data = telemetry[apoint.Uid].Beacons
+                .SelectMany(b => b.Select(bi => new { mac = b.Mac, Item = bi })).OrderBy(x => x.Item.Time);
 
             foreach (var beacon in data)
             {
                 RefreshBeaconInfoGroup(beacon.mac, beacon.Item);
 
-              //  CheckSlideAverage(apoint, beacon.LastItem);
+                //  CheckSlideAverage(apoint, beacon.LastItem);
             }
 
-           // commonList = null;
             Flush();
         }
 
@@ -76,7 +73,7 @@ namespace Trigger
         {
             foreach (var g in group)
             {
-               if ((time - g.LastRssiTime) >= timeOffset)
+                if ((time - g.LastRssiTime) >= timeOffset)
                     g.ResetSlideAverageRssi();
             }
         }
@@ -91,9 +88,9 @@ namespace Trigger
             _lastBeacon = beacon;
 
             if (_secondLineInfo > BeaconInfoGroup.Max(_firstLineInfo, _helpLineInfo))
-                Status = AppearStatus.Inside;
+                ChangeStatus(AppearStatus.Inside);
             else if (_firstLineInfo > _secondLineInfo)
-                Status = AppearStatus.Outside;
+                ChangeStatus(AppearStatus.Outside);
         }
 
         private void RefreshBeaconInfoGroup(string macAddr, BeaconItem beacon)

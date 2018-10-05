@@ -49,5 +49,21 @@ namespace Trigger.Test
             // Post-validate
             Assert.True(sw.ElapsedMilliseconds < 23 * 1000);
         }
+
+        [Fact]
+        public void Test_PoolLogging()
+        {            
+            // Prepare
+            IObjectPool<string, Ranger> pool = GetNewPool();
+           // pool["test"] = new Ranger();
+            IRanger ranger = pool["test"];
+
+            // Pre-validate
+            Assert.NotNull(ranger);
+
+            // Perform
+            ((Ranger)ranger).ChangeStatus(AppearStatus.Inside);
+
+        }
     }
 }
