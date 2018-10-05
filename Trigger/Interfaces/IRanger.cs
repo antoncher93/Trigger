@@ -2,7 +2,7 @@
 
 namespace Trigger.Interfaces
 {
-    public interface IRanger
+    public interface IRanger : ITriggerEvents
     {
         void CheckTelemetry(Telemetry telemetry);
 
