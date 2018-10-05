@@ -14,20 +14,16 @@ namespace Trigger.Classes
     /// </summary>
     public class RangerPool :
         ConcurrentDictionary<string, Ranger>
-        , IObjectPool<string, Ranger>
-        , ITriggerEvents
+        , IRangerPool
     {
         private readonly IRangerSettings _rangerSettings = null;
-        private readonly ILogger<IObjectPool<string, Ranger>> _logger = null;
 
-        public RangerPool(IRangerSettings rangerSettings, ILogger<IObjectPool<string, Ranger>> logger)
+        public RangerPool(IRangerSettings rangerSettings)
         {
             _rangerSettings = rangerSettings;
-            _logger = logger;
-            OnEvent += (sender, e) => { _logger.Log(LogLevel.Information, $"User '{e.UserId}' status changed at {e.DateTime}: {e.Type}"); };
         }
 
-        public new IRanger this[string key]
+        public IRanger this[string key]
         {
             get
             {

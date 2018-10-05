@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using Trigger.Classes;
 using Trigger.Interfaces;
+using Xunit.Abstractions;
 
 namespace Trigger.Test
 {
@@ -10,23 +11,25 @@ namespace Trigger.Test
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public IObjectPool<string, Ranger> GetNewPool()
+        public IRangerPool GetNewPool()
         {
-            return _serviceProvider.GetService<IObjectPool<string, Ranger>>();
+            return _serviceProvider.GetService<IRangerPool>();
         }
 
         public ILogger _logger;
 
-        public BaseTest()
+        public BaseTest(ITestOutputHelper testOutputHelper)
         {
             _serviceProvider =
                   new ServiceCollection()
-                      .AddTransient<IObjectPool<string, Ranger>, RangerPool>()
+                      .AddTransient<IRangerPool, RangerPool>()
                       .AddSingleton<IRangerSettings, DummyRangerSettings>()
                       .AddLogging()
                       .BuildServiceProvider();
 
-            _logger = _serviceProvider.GetService<ILoggerFactory>().CreateLogger<IRanger>();
+            var loggerFactory = _serviceProvider.GetService<ILoggerFactory>();
+            loggerFactory.AddProvider(new XunitLoggerProvider(testOutputHelper));
+            _logger = loggerFactory.CreateLogger<BaseTest>();
         }
     }
 }
