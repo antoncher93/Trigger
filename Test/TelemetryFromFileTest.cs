@@ -4,11 +4,15 @@ using System.IO;
 using System.Text;
 using Trigger.Signal;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Trigger.Test
 {
     public class TelemetryFromFileTest : BaseTest
     {
+        public TelemetryFromFileTest(ITestOutputHelper helper)
+            : base(helper) { }
+
         [Fact]
         public void GetTelemetryFromRes()
         {

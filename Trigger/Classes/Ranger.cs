@@ -26,11 +26,18 @@ namespace Trigger
         private AppearStatus _status = AppearStatus.Unknown;
 
         private TimeSpan timeOffset = new TimeSpan(0, 0, 2);
+        private int _barier = 0;
+        private bool _anyLinesChanged = false;
+        private DateTime _lastIventTime = DateTime.MinValue;
+        private TimeSpan iventTimeOffset = new TimeSpan(0, 0, 2);
         #endregion
 
         internal void ChangeStatus(AppearStatus value)
         {
-            if (_status != AppearStatus.Unknown && _status != value)
+            if (_status != AppearStatus.Unknown 
+                && _status != value
+                && (_lastBeacon.Time - _lastIventTime) >= iventTimeOffset)
+            {
                 OnEvent?.Invoke(this, new TriggerEventArgs
                 {
                     AccessPointUid = apoint.Uid,
@@ -38,6 +45,9 @@ namespace Trigger
                     UserId = _userUid,
                     Type = (value == AppearStatus.Inside ? TriggerEventType.Enter : TriggerEventType.Exit)
                 });
+
+                _lastIventTime = _lastBeacon.Time;
+            }
 
             _status = value;
         }
@@ -49,32 +59,41 @@ namespace Trigger
         {
             _userUid = telemetry.UserId;
 
+            //заглушка 
+            _barier = 5;
+
+            BeaconItem prevSignal = BeaconItem.Default;
+
             var data = telemetry[apoint.Uid].Beacons
                 .SelectMany(b => b.Select(bi => new { mac = b.Mac, Item = bi })).OrderBy(x => x.Item.Time);
 
-            foreach (var beacon in data)
+            var any = data.Any();
+            var fir = data.First();
+            while (any)
             {
-                RefreshBeaconInfoGroup(beacon.mac, beacon.Item);
+                var oneTime = data.Where(v => v.Item.Time == fir.Item.Time);
 
-                //  CheckSlideAverage(apoint, beacon.LastItem);
+                foreach(var beacon in oneTime)
+                {
+                    RefreshBeaconInfoGroup(beacon.mac, beacon.Item);
+                }
+                if(_anyLinesChanged)
+                {
+                    CheckSlideAverage(apoint, fir.Item);
+                    _anyLinesChanged = false;
+                }
+
+                fir = data.FirstOrDefault(f => f.Item.Time > fir.Item.Time);
+
+                if (fir == null) break;
             }
-
             Flush();
         }
 
         private void Flush()
         {
             _status = AppearStatus.Unknown;
-            _userUid = "";
-        }
-
-        private void ResetSlideRssi(BeaconInfoGroup group, DateTime time)
-        {
-            foreach (var g in group)
-            {
-                if ((time - g.LastRssiTime) >= timeOffset)
-                    g.ResetSlideAverageRssi();
-            }
+            _userUid = "";  
         }
 
         /// <summary>
@@ -84,11 +103,13 @@ namespace Trigger
         /// <param name="beacon"></param>
         private void CheckSlideAverage(AccessPoint apoint, BeaconItem beacon)
         {
+            UpdateLinesRss(beacon.Time);
+
             _lastBeacon = beacon;
 
-            if (_secondLineInfo > BeaconInfoGroup.Max(_firstLineInfo, _helpLineInfo))
+            if ((_secondLineInfo - BeaconInfoGroup.Max(_firstLineInfo, _helpLineInfo))>_barier)
                 ChangeStatus(AppearStatus.Inside);
-            else if (_firstLineInfo > _secondLineInfo)
+            else if ((_firstLineInfo - _secondLineInfo)>_barier)
                 ChangeStatus(AppearStatus.Outside);
         }
 
@@ -113,8 +134,9 @@ namespace Trigger
                     }
                     res.SetLastRssi(beacon);
 
-                    ResetSlideRssi(group, beacon.Time);
+                    //ResetSlideRssi(group, beacon.Time);
 
+                    _anyLinesChanged = true;
                     return;
                 }
             };
@@ -122,6 +144,13 @@ namespace Trigger
             CheckBeacon(_firstLineBeacons, _firstLineInfo);
             CheckBeacon(_secondLineBeacons, _secondLineInfo);
             CheckBeacon(_helpBeacons, _helpLineInfo);
+        }
+
+        private void UpdateLinesRss(DateTime actual_time) // проверить всемя последних сигналов от линий
+        {
+            _firstLineInfo.UpdateSlideAverageRssi(actual_time);
+            _secondLineInfo.UpdateSlideAverageRssi(actual_time);
+            _helpLineInfo.UpdateSlideAverageRssi(actual_time);
         }
 
         public bool IsObsolete()

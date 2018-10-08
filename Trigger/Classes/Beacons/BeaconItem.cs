@@ -7,6 +7,18 @@ namespace Trigger.Beacons
         public int Rssi { get; set; }
         public DateTime Time { get; set; }
 
+        public static BeaconItem Default
+        {
+            get
+            {
+                return new BeaconItem
+                {
+                    Rssi = 0,
+                    Time = DateTime.MinValue
+                };
+            }
+        }
+
         public static BeaconItem FromCompact(long value, DateTime offset)
         {
             if (value < 0)
