@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Trigger.Beacons;
 using Trigger.Classes;
-using Trigger.Classes.Beacons;
+using Trigger.Enums;
 using Trigger.Interfaces;
 using Trigger.Signal;
 
 namespace Trigger
 {
-    public class Ranger : IRanger, ITriggerEvents
+    public class Ranger : IRanger
     {
         #region Variables
         internal int slideAverageCount = 5;
@@ -22,50 +22,42 @@ namespace Trigger
         private BeaconInfoGroup _firstLineInfo = new BeaconInfoGroup();
         private BeaconInfoGroup _secondLineInfo = new BeaconInfoGroup();
         private BeaconInfoGroup _helpLineInfo = new BeaconInfoGroup();
-        private BeaconItem _lastSignal;
+        private BeaconItem _lastBeacon;
         private AppearStatus _status = AppearStatus.Unknown;
 
         private TimeSpan timeOffset = new TimeSpan(0, 0, 2);
         #endregion
 
-        private AppearStatus Status
+        internal void ChangeStatus(AppearStatus value)
         {
-            get => _status;
-            set
-            {
-                if (_status != AppearStatus.Unknown && _status != value)
+            if (_status != AppearStatus.Unknown && _status != value)
+                OnEvent?.Invoke(this, new TriggerEventArgs
                 {
-                    if (value == AppearStatus.Inside)
-                        OnEnter?.Invoke(this, new TriggerEventArgs(apoint, _lastSignal.Time, _userUid));
-                    else
-                        OnExit?.Invoke(this, new TriggerEventArgs(apoint, _lastSignal.Time, _userUid));
-                }
+                    AccessPointUid = apoint.Uid,
+                    DateTime = _lastBeacon.Time,
+                    UserId = _userUid,
+                    Type = (value == AppearStatus.Inside ? TriggerEventType.Enter : TriggerEventType.Exit)
+                });
 
-                _status = value;
-            }
+            _status = value;
         }
 
-        public event EventHandler<TriggerEventArgs> OnEnter;
-        public event EventHandler<TriggerEventArgs> OnExit;
+        public event EventHandler<TriggerEventArgs> OnEvent;
 
         #region Methods
         public void CheckTelemetry(Telemetry telemetry)
         {
             _userUid = telemetry.UserId;
 
-            var data = telemetry[apoint.Uid].Beacons.SelectMany(b => b.Select(bi => new { mac = b.Mac, Item = bi })).OrderBy(x => x.Item.Time);
+            var data = telemetry[apoint.Uid].Beacons
+                .SelectMany(b => b.Select(bi => new { mac = b.Mac, Item = bi })).OrderBy(x => x.Item.Time);
 
             foreach (var beacon in data)
             {
-                if(!DateTime.Equals(beacon.Item.Time, _lastSignal.Time))
-                {
-                    CheckSlideAverage(apoint, beacon.Item);
-                }
                 RefreshBeaconInfoGroup(beacon.mac, beacon.Item);
-                _lastSignal = beacon.Item;
-              //  
+
+                //  CheckSlideAverage(apoint, beacon.LastItem);
             }
-            CheckSlideAverage(apoint, _lastSignal);
 
             Flush();
         }
@@ -80,7 +72,7 @@ namespace Trigger
         {
             foreach (var g in group)
             {
-               if ((time - g.LastRssiTime) >= timeOffset)
+                if ((time - g.LastRssiTime) >= timeOffset)
                     g.ResetSlideAverageRssi();
             }
         }
@@ -92,12 +84,12 @@ namespace Trigger
         /// <param name="beacon"></param>
         private void CheckSlideAverage(AccessPoint apoint, BeaconItem beacon)
         {
-            _lastSignal = beacon;
+            _lastBeacon = beacon;
 
             if (_secondLineInfo > BeaconInfoGroup.Max(_firstLineInfo, _helpLineInfo))
-                Status = AppearStatus.Inside;
+                ChangeStatus(AppearStatus.Inside);
             else if (_firstLineInfo > _secondLineInfo)
-                Status = AppearStatus.Outside;
+                ChangeStatus(AppearStatus.Outside);
         }
 
         private void RefreshBeaconInfoGroup(string macAddr, BeaconItem beacon)
@@ -116,8 +108,7 @@ namespace Trigger
                     var res = group.FirstOrDefault(b => string.Equals(b.MacAddress, macAddr, StringComparison.InvariantCultureIgnoreCase));
                     if (res == null)
                     {
-                        res = new BeaconInfo(macAddr);
-                        res.SlideAverageCount = slideAverageCount;
+                        res = new BeaconInfo(macAddr) { SlideAverageCount = slideAverageCount };
                         group.Add(res);
                     }
                     res.SetLastRssi(beacon);
@@ -131,10 +122,6 @@ namespace Trigger
             CheckBeacon(_firstLineBeacons, _firstLineInfo);
             CheckBeacon(_secondLineBeacons, _secondLineInfo);
             CheckBeacon(_helpBeacons, _helpLineInfo);
-
-            //ResetSlideRssi(_firstLineInfo, beacon);
-            //ResetSlideRssi(_secondLineInfo, beacon);
-            //ResetSlideRssi(_helpLineInfo, beacon);
         }
 
         public bool IsObsolete()

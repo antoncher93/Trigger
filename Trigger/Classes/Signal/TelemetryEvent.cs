@@ -1,19 +1,13 @@
 ﻿using System;
-using Trigger.Classes;
+using Trigger.Enums;
 
 namespace Trigger.Signal
 {
     public class TriggerEventArgs : EventArgs
     {
-        public TriggerEventArgs(AccessPoint apoint, DateTime time, string userId)
-        {
-            APoint = apoint;
-            DateTime = time;
-            UserId = userId;
-        }
-
-        public AccessPoint APoint { get; private set; }
-        public DateTime DateTime { get; private set; }
-        public string UserId { get; private set; }
+        public TriggerEventType Type { get; set; }
+        public string AccessPointUid { get; set; }
+        public string UserId { get; set; }
+        public DateTime DateTime { get; set; }
     }
 }
