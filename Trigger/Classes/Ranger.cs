@@ -34,9 +34,11 @@ namespace Trigger
 
         internal void ChangeStatus(AppearStatus value)
         {
-            if (_status != AppearStatus.Unknown 
-                && _status != value
-                && (_lastBeacon.Time - _lastIventTime) >= iventTimeOffset)
+            if (
+                //_status != AppearStatus.Unknown && 
+                _status != value
+                && (_lastBeacon.Time - _lastIventTime) >= iventTimeOffset
+                )
             {
                 OnEvent?.Invoke(this, new TriggerEventArgs
                 {
@@ -45,11 +47,11 @@ namespace Trigger
                     UserId = _userUid,
                     Type = (value == AppearStatus.Inside ? TriggerEventType.Enter : TriggerEventType.Exit)
                 });
-
+                _status = value;
                 _lastIventTime = _lastBeacon.Time;
             }
 
-            _status = value;
+            
         }
 
         public event EventHandler<TriggerEventArgs> OnEvent;
