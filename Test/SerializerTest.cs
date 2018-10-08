@@ -1,15 +1,19 @@
 ﻿using Newtonsoft.Json;
-using System;
-using Trigger.Beacons;
 using Trigger.Classes;
-using Trigger.Classes.Beacons;
 using Trigger.Signal;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Trigger.Test
 {
     public class SerializerTest : BaseTest
     {
+        public SerializerTest(ITestOutputHelper testOutputHelper)
+            : base(testOutputHelper)
+        {
+
+        }
+
         [Theory]
         [MemberData(nameof(DataSource.GetTelemerty_10x6), MemberType = typeof(DataSource))]
         public void Test_Serialization_Check(TelemetryGroup group)

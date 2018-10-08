@@ -5,7 +5,6 @@ namespace Trigger.Interfaces
 {
     public interface ITriggerEvents
     {
-        event EventHandler<TriggerEventArgs> OnEnter;
-        event EventHandler<TriggerEventArgs> OnExit;
+        event EventHandler<TriggerEventArgs> OnEvent;
     }
 }
