@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using Trigger.Beacons;
 using Trigger.Classes;
 using Trigger.Classes.Beacons;
@@ -170,5 +172,20 @@ namespace Trigger.Test
 
         private static string NewGuid()
         => Guid.NewGuid().ToString();
+
+        public static Telemetry GetTelemetryFromResource()
+        {
+            Telemetry telemetry = null;
+            var assembly = Assembly.GetExecutingAssembly();
+            using (var telemetry_stream = assembly.GetManifestResourceStream("Trigger.Test.Resources.telemetry.txt"))
+            {
+                StreamReader reader = new StreamReader(telemetry_stream);
+                string str = reader.ReadToEnd();
+                telemetry = Newtonsoft.Json.JsonConvert.DeserializeObject<Telemetry>(str, new TelemetryJsonConverter());
+            }
+
+            return telemetry;
+        }
+
     }
 }
