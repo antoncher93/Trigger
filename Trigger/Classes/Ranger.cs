@@ -22,7 +22,7 @@ namespace Trigger
         private BeaconInfoGroup _firstLineInfo = new BeaconInfoGroup();
         private BeaconInfoGroup _secondLineInfo = new BeaconInfoGroup();
         private BeaconInfoGroup _helpLineInfo = new BeaconInfoGroup();
-        private BeaconItem _lastBeacon;
+        private BeaconItem _lastSignal;
         private AppearStatus _status = AppearStatus.Unknown;
 
         private TimeSpan timeOffset = new TimeSpan(0, 0, 2);
@@ -36,9 +36,9 @@ namespace Trigger
                 if (_status != AppearStatus.Unknown && _status != value)
                 {
                     if (value == AppearStatus.Inside)
-                        OnEnter?.Invoke(this, new TriggerEventArgs(apoint, _lastBeacon.Time, _userUid));
+                        OnEnter?.Invoke(this, new TriggerEventArgs(apoint, _lastSignal.Time, _userUid));
                     else
-                        OnExit?.Invoke(this, new TriggerEventArgs(apoint, _lastBeacon.Time, _userUid));
+                        OnExit?.Invoke(this, new TriggerEventArgs(apoint, _lastSignal.Time, _userUid));
                 }
 
                 _status = value;
@@ -57,12 +57,16 @@ namespace Trigger
 
             foreach (var beacon in data)
             {
+                if(!DateTime.Equals(beacon.Item.Time, _lastSignal.Time))
+                {
+                    CheckSlideAverage(apoint, beacon.Item);
+                }
                 RefreshBeaconInfoGroup(beacon.mac, beacon.Item);
-
-              //  CheckSlideAverage(apoint, beacon.LastItem);
+                _lastSignal = beacon.Item;
+              //  
             }
+            CheckSlideAverage(apoint, _lastSignal);
 
-           // commonList = null;
             Flush();
         }
 
@@ -88,7 +92,7 @@ namespace Trigger
         /// <param name="beacon"></param>
         private void CheckSlideAverage(AccessPoint apoint, BeaconItem beacon)
         {
-            _lastBeacon = beacon;
+            _lastSignal = beacon;
 
             if (_secondLineInfo > BeaconInfoGroup.Max(_firstLineInfo, _helpLineInfo))
                 Status = AppearStatus.Inside;
