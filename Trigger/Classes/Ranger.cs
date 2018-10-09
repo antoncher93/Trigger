@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Trigger.Beacons;
@@ -52,8 +53,17 @@ namespace Trigger
             var data = telemetry[apoint.Uid].Beacons
                 .SelectMany(b => b.Select(bi => new { mac = b.Mac, Item = bi })).OrderBy(x => x.Item.Time);
 
-            foreach (var beacon in data)
+            bool any = data.Any();
+            DateTime minDate = data.First().Item.Time;
+            
+            while (any)
             {
+                var oneTime = data.Where(b => b.Item.Time == minDate);
+                any = data.Any(b => b.Item.Time > minDate);
+                if (!any)
+                    break;
+                minDate = data.FirstOrDefault(b => b.Item.Time > minDate).Item.Time;
+                
                 RefreshBeaconInfoGroup(beacon.mac, beacon.Item);
 
                 //  CheckSlideAverage(apoint, beacon.LastItem);
