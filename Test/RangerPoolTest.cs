@@ -4,13 +4,17 @@ using Trigger.Signal;
 using Xunit;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Trigger.Classes;
+using Xunit.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace Trigger.Test
 {
     public class RangerPoolTest : BaseTest
     {
+        public RangerPoolTest(ITestOutputHelper testOutputHelper)
+            : base(testOutputHelper)
+        { }
+
         [Fact]
         public void Test_TelemetryGroup_Binding_10x6()
         {
@@ -21,7 +25,7 @@ namespace Trigger.Test
             sw.Stop();
 
             // Validate
-            Assert.Equal(1000000, group.Count());
+            Assert.Equal(100000, group.Count());
             Assert.True(sw.ElapsedMilliseconds < 12 * 1000);
         }
 
@@ -30,7 +34,7 @@ namespace Trigger.Test
         public void Test_Stress_Check(TelemetryGroup group)
         {
             // Prepare
-            IObjectPool<string, Ranger> pool = GetNewPool();
+            IRangerPool pool = GetNewPool();
 
             // Pre-validate
             Assert.NotNull(pool);
@@ -48,6 +52,27 @@ namespace Trigger.Test
 
             // Post-validate
             Assert.True(sw.ElapsedMilliseconds < 23 * 1000);
+        }
+
+        [Fact]
+        public void Test_Pool_Event()
+        {
+            // Prepare
+            IRangerPool pool = GetNewPool();
+            bool ok = false;
+
+            // Pre-validate
+            pool.OnEvent += (sender, e) => {
+                ok = true;
+                _logger.LogInformation($"User '{e.UserId}' status changed at {e.DateTime}: {e.Type}");
+            };
+
+            // Perform
+            ((Ranger)pool["test"]).ChangeStatus(AppearStatus.Outside);
+            ((Ranger)pool["test"]).ChangeStatus(AppearStatus.Inside);
+
+            // Post-validate
+            Assert.True(ok);
         }
     }
 }

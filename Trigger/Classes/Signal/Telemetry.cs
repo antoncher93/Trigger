@@ -13,7 +13,7 @@ namespace Trigger.Signal
 {
     public class Telemetry : Dictionary<string, AccessPoint>
     {
-        [JsonProperty(Order = 1)]
+        [JsonProperty(Order = 1)]  
         public string UserId { get; set; }
 
         public Telemetry Add(AccessPoint point)
@@ -75,16 +75,13 @@ namespace Trigger.Signal
 
         public void NewBeacon(string mac, int rssi, string apointUid, DateTime time)
         {
-            if (this[apointUid] == null)
-                this[apointUid] = AccessPoint.FromUid(apointUid);
-
-            AccessPoint apoint = this[apointUid];
-            //var apoint = Data.FirstOrDefault(ap => ap.Value.Uid == apointUid).Value;
-            //if(apoint == null)
-            //{
-            //    apoint = AccessPoint.FromUid(apointUid);
-            //    Data.Add(apoint);
-            //}
+            AccessPoint apoint = null;
+            if (!this.ContainsKey(apointUid))
+            {
+                apoint = AccessPoint.FromUid(apointUid);
+                this.Add(apoint);
+            }
+            apoint = this[apointUid];
 
             var beacon = apoint.Beacons.FirstOrDefault(b => b.Mac == mac);
             if (beacon == null)

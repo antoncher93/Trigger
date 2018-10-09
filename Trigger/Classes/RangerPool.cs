@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Trigger.Beacons;
@@ -13,8 +14,7 @@ namespace Trigger.Classes
     /// </summary>
     public class RangerPool :
         ConcurrentDictionary<string, Ranger>
-        , IObjectPool<string, Ranger>
-        , ITriggerEvents
+        , IRangerPool
     {
         private readonly IRangerSettings _rangerSettings = null;
 
@@ -23,7 +23,7 @@ namespace Trigger.Classes
             _rangerSettings = rangerSettings;
         }
 
-        public Ranger this[string key]
+        public IRanger this[string key]
         {
             get
             {
@@ -47,16 +47,14 @@ namespace Trigger.Classes
 
                       Ranger result = builder.Build();
 
-                      result.OnEnter += OnEnter;
-                      result.OnExit += OnExit;
+                      result.OnEvent += OnEvent;
 
                       return result;
                   });
             }
         }
 
-        public event EventHandler<TriggerEventArgs> OnEnter;
-        public event EventHandler<TriggerEventArgs> OnExit;
+        public event EventHandler<TriggerEventArgs> OnEvent;
 
         public void Flush()
         {
