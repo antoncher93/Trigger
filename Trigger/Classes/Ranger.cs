@@ -60,9 +60,11 @@ namespace Trigger
             _userUid = telemetry.UserId;
 
             //заглушка 
-            _barier = 5;
+            _barier = 0;
 
             BeaconItem prevSignal = BeaconItem.Default;
+
+            if (!telemetry.ContainsKey(apoint.Uid)) return;
 
             var data = telemetry[apoint.Uid].Beacons
                 .SelectMany(b => b.Select(bi => new { mac = b.Mac, Item = bi })).OrderBy(x => x.Item.Time);
