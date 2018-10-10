@@ -64,7 +64,7 @@ namespace Trigger.Beacons
             SlideAverageCount = 3;
         }
 
-        private TimeSpan _timeOffset = new TimeSpan(0, 0, 2);
+        private TimeSpan _timeOffset = new TimeSpan(0, 0, 0, 0, 100);
         //public bool Changed { get; private set; } = false;
         /// <summary>
         /// 

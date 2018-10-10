@@ -27,7 +27,7 @@ namespace Trigger.Test
             bool result = false;
             int count = 0;
             Telemetry telemetry = DataSource.GetTelemetryFromResource();
-
+            
             RangerPool pool = new RangerPool(new DummyRangerSettings());
 
             foreach (var key in telemetry.Keys)

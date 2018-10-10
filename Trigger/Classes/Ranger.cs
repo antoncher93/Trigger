@@ -60,19 +60,19 @@ namespace Trigger
             _userUid = telemetry.UserId;
 
             //заглушка 
-            _barier = 5;
+            _barier = 0;
 
             BeaconItem prevSignal = BeaconItem.Default;
 
             var data = telemetry[apoint.Uid].Beacons
-                .SelectMany(b => b.Select(bi => new { mac = b.Mac, Item = bi })).OrderBy(x => x.Item.Time);
+                .SelectMany(b => b.Select(bi => new { mac = b.Mac, Item = bi })).OrderBy(x => x.Item.Time).ToList();
 
             var any = data.Any();
             var fir = data.First();
             while (any)
             {
                 var oneTime = data.Where(v => v.Item.Time == fir.Item.Time);
-
+                
                 foreach(var beacon in oneTime)
                 {
                     RefreshBeaconInfoGroup(beacon.mac, beacon.Item);
