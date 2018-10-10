@@ -58,13 +58,14 @@ namespace Trigger.Beacons
         {
             get; set;
         }
-
         public BeaconInfoGroup()
         {
             beacons = new List<BeaconInfo>();
             SlideAverageCount = 3;
         }
 
+        private TimeSpan _timeOffset = new TimeSpan(0, 0, 2);
+        //public bool Changed { get; private set; } = false;
         /// <summary>
         /// 
         /// </summary>
@@ -103,6 +104,15 @@ namespace Trigger.Beacons
         }
 
         #region Operations
+        public static double operator -(BeaconInfoGroup a, BeaconInfoGroup b)
+        {
+            if(a == null || b== null)
+            {
+                throw new NullReferenceException();
+            }
+            return a.MaxSlideRssi - b.MaxSlideRssi;
+        }
+
         public static bool operator <(BeaconInfoGroup a, BeaconInfoGroup b)
         {
             if (a == null && b == null)
@@ -171,6 +181,17 @@ namespace Trigger.Beacons
                     max = i;
 
             return max;
+        }
+
+        public void UpdateSlideAverageRssi(DateTime actual_time)
+        {
+            foreach(var beacon in beacons)
+            {
+                if(actual_time - beacon.LastRssiTime > new TimeSpan?(_timeOffset) )
+                {
+                    beacon.ResetSlideAverageRssi();
+                }
+            }
         }
         #endregion
     }

@@ -1,0 +1,9 @@
+C:\Users\Anton\source\repos\Trigger\bin\Debug\netstandard2.0\Trigger.deps.json
+C:\Users\Anton\source\repos\Trigger\bin\Debug\netstandard2.0\Trigger.dll
+C:\Users\Anton\source\repos\Trigger\bin\Debug\netstandard2.0\Trigger.pdb
+C:\Users\Anton\source\repos\Trigger\obj\Debug\netstandard2.0\Trigger.csprojResolveAssemblyReference.cache
+C:\Users\Anton\source\repos\Trigger\obj\Debug\netstandard2.0\Trigger.csproj.CoreCompileInputs.cache
+C:\Users\Anton\source\repos\Trigger\obj\Debug\netstandard2.0\Trigger.AssemblyInfoInputs.cache
+C:\Users\Anton\source\repos\Trigger\obj\Debug\netstandard2.0\Trigger.AssemblyInfo.cs
+C:\Users\Anton\source\repos\Trigger\obj\Debug\netstandard2.0\Trigger.dll
+C:\Users\Anton\source\repos\Trigger\obj\Debug\netstandard2.0\Trigger.pdb
