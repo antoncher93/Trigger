@@ -13,11 +13,11 @@ namespace Trigger.Test
             switch (line)
             {
                 case BeaconLine.Help:
-                    return new[] { BeaconBody.FromMac("de:a6:78:08:52:a2") };
+                    return new[] { BeaconBody.FromMac("00de:a6:78:08:52:a2") };
                 case BeaconLine.First:
-                    return new[] { BeaconBody.FromMac("c9:18:b1:cf:9b:50") };
+                    return new[] { BeaconBody.FromMac("DF:20:C6:5A:62:5F")};
                 case BeaconLine.Second:
-                    return new[] { BeaconBody.FromMac("e3:25:3e:0a:7e:4c") };
+                    return new[] { BeaconBody.FromMac("DE:A6:78:08:52:A2") };
                 default:
                     throw new ArgumentException("Unknown line type");
             }

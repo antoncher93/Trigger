@@ -3,11 +3,17 @@ using System.Collections.Generic;
 using System.Text;
 using Trigger.Signal;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Trigger.Test
 {
     public class SignalAppendTest : BaseTest
     {
+        public SignalAppendTest(ITestOutputHelper helper) : base(helper)
+        {
+
+        }
+
         [Fact]
         public void AddSingleSignalToTelemetryTest()
         {
