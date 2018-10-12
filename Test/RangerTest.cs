@@ -48,7 +48,7 @@ namespace Trigger.Test
                     }
                     count++;
                 };
-                ranger.CheckTelemetryByActualRssi(telemetry);
+                ranger.CheckTelemetry(telemetry);
             }
 
             

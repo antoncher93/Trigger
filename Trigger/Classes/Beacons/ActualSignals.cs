@@ -9,14 +9,18 @@ namespace Trigger.Classes.Beacons
 {
     public class ActualSignals : ICollection<BeaconItem>
     {
-        private IList<BeaconItem> signals = new List<BeaconItem>();
+        public ActualSignals(int milliseconds)
+        {
+            ActualPeriod = new TimeSpan(0, 0, 0, 0, milliseconds);
+            signals = new List<BeaconItem>();
+        }
 
-        private TimeSpan ActualPeriod { get; set; } = new TimeSpan(0, 0, 1);
+        private IList<BeaconItem> signals;
+        public DateTime UpdateTime { get; private set; }
+        public TimeSpan ActualPeriod { get; set; }
 
         public int Count => signals.Count;
-
         public bool IsReadOnly => signals.IsReadOnly;
-
         public void Add(BeaconItem item)
         {
             signals.Add(item);
@@ -27,32 +31,26 @@ namespace Trigger.Classes.Beacons
         {
             signals.Clear();
         }
-
         public bool Contains(BeaconItem item)
         {
             return signals.Contains(item);
         }
-
         public void CopyTo(BeaconItem[] array, int arrayIndex)
         {
             signals.CopyTo(array, arrayIndex);
         }
-
         public IEnumerator<BeaconItem> GetEnumerator()
         {
             return signals.GetEnumerator();
         }
-
         public bool Remove(BeaconItem item)
         {
             return signals.Remove(item);
         }
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return signals.GetEnumerator();
         }
-
         public ActualSignals Update(DateTime actualTime)
         {
             for(int i = 0; i< signals.Count; i++)
@@ -66,8 +64,6 @@ namespace Trigger.Classes.Beacons
             UpdateTime = actualTime;
             return this;
         }
-
-        public DateTime UpdateTime { get; private set; }
 
         public double AverageRssi
         {
@@ -89,7 +85,6 @@ namespace Trigger.Classes.Beacons
                 }
             }
         }
-
         public int AmountRssi
         {
             get

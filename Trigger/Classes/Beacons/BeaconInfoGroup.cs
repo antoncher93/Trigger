@@ -8,9 +8,11 @@ namespace Trigger.Beacons
 {
     public class BeaconInfoGroup : ICollection<BeaconInfo>
     {
-        #region//from ICollection
+        
 
-        private IList<BeaconInfo> beacons;
+        #region From ICollection
+
+        private IList<BeaconInfo> beacons = new List<BeaconInfo>();
 
         public int Count => beacons.Count;
 
@@ -33,7 +35,7 @@ namespace Trigger.Beacons
 
         public void CopyTo(BeaconInfo[] array, int arrayIndex)
         {
-
+            beacons.CopyTo(array, arrayIndex);
         }
 
         public IEnumerator<BeaconInfo> GetEnumerator()
@@ -53,17 +55,14 @@ namespace Trigger.Beacons
 
         #endregion
 
-        public int SlideAverageCount
-        {
-            get; set;
-        }
+
+        public int ActualPeriod { get; set; } = 1000;
         public BeaconInfoGroup()
         {
             beacons = new List<BeaconInfo>();
-            SlideAverageCount = 3;
         }
 
-        internal TimeSpan TimeOffset { get; set; } = new TimeSpan(0, 0, 0, 0, 500);
+     
         //public bool Changed { get; private set; } = false;
         /// <summary>
         /// 
@@ -75,7 +74,7 @@ namespace Trigger.Beacons
             var foundbeacon = beacons.FirstOrDefault(b => string.Equals(b.MacAddress, macAddress, StringComparison.CurrentCultureIgnoreCase));
             if (foundbeacon == null)
             {
-                foundbeacon = new BeaconInfo(macAddress);
+                foundbeacon = new BeaconInfo(macAddress, ActualPeriod);
                 this.Add(foundbeacon);
             }
 
