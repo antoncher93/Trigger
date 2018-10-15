@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Trigger.Beacons;
+using Trigger.Classes.Logging;
 using Trigger.Enums;
 
 namespace Trigger.Interfaces
@@ -9,7 +10,7 @@ namespace Trigger.Interfaces
     public interface IRangerSettings
     {
         IEnumerable<IBeaconBody> GetBeacons(string accessPoint, BeaconLine line);
-
-        int GetSlideAverageCount(string accessPoint);
+        int GetActualPeriod();
+        ILogger GetLogger();
     }
 }

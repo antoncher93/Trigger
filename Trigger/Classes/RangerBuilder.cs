@@ -1,6 +1,7 @@
 ﻿using System;
 using Trigger.Beacons;
 using Trigger.Classes;
+using Trigger.Classes.Logging;
 
 namespace Trigger
 {
@@ -31,6 +32,9 @@ namespace Trigger
 
         public RangerBuilder SetActualPeriod(int milliseconds)
             => Modify(() => { ranger._actualSignalPeriod = milliseconds; });
+
+        public RangerBuilder SetLogger(ILogger logger)
+            => Modify(() => { ranger._logger = logger; });
 
         public Ranger Build()
         {           

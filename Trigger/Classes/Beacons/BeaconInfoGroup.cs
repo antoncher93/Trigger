@@ -3,13 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Trigger.Classes.Logging;
 
 namespace Trigger.Beacons
 {
     public class BeaconInfoGroup : ICollection<BeaconInfo>
     {
-        
-
         #region From ICollection
 
         private IList<BeaconInfo> beacons = new List<BeaconInfo>();
@@ -56,13 +55,19 @@ namespace Trigger.Beacons
         #endregion
 
 
+        private ILogger _logger;
         public int ActualPeriod { get; set; } = 1000;
         public BeaconInfoGroup()
         {
-            beacons = new List<BeaconInfo>();
+            
         }
 
-     
+        public BeaconInfoGroup(ILogger logger)
+        {
+            _logger = logger;
+        }
+
+
         //public bool Changed { get; private set; } = false;
         /// <summary>
         /// 
@@ -78,8 +83,10 @@ namespace Trigger.Beacons
                 this.Add(foundbeacon);
             }
 
-            foundbeacon.SetLastRssi(beacon);
+            foundbeacon.Add(beacon);
         }
+
+        public double ValueToCompare => MaxAverRssi;
 
         public double MaxAverRssi
         {
@@ -87,17 +94,9 @@ namespace Trigger.Beacons
             {
                 if (beacons.Count > 0)
                 {
-                    return beacons.OrderByDescending(b => b.ActualSignals.AverageRssi).FirstOrDefault().ActualSignals.AverageRssi;
+                    return beacons.OrderByDescending(b => b.AverageRssi).FirstOrDefault().AverageRssi;
                 }
                 else return -200;
-            }
-        }
-
-        public double MaxRssiAmount
-        {
-            get
-            {
-                return beacons.OrderByDescending(b => b.ActualSignals.AmountRssi).FirstOrDefault().ActualSignals.AmountRssi;
             }
         }
 
@@ -105,7 +104,7 @@ namespace Trigger.Beacons
         {
             foreach (var beacon in beacons)
             {
-                beacon.ActualSignals.Update(actual_time);
+                beacon.Update(actual_time);
             }
         }
 
@@ -116,7 +115,7 @@ namespace Trigger.Beacons
             {
                 throw new NullReferenceException();
             }
-            return a.MaxAverRssi - b.MaxAverRssi;
+            return a.ValueToCompare - b.ValueToCompare;
         }
 
         public static bool operator <(BeaconInfoGroup a, BeaconInfoGroup b)
@@ -130,7 +129,7 @@ namespace Trigger.Beacons
             if (a != null && b == null)
                 return false;
 
-            return a.MaxAverRssi < b.MaxAverRssi;
+            return a.ValueToCompare < b.ValueToCompare;
         }
 
         public static bool operator >(BeaconInfoGroup a, BeaconInfoGroup b)
@@ -144,7 +143,7 @@ namespace Trigger.Beacons
             if (a != null && b == null)
                 return true;
 
-            return a.MaxAverRssi > b.MaxAverRssi;
+            return a.ValueToCompare > b.ValueToCompare;
         }
 
       
@@ -160,7 +159,7 @@ namespace Trigger.Beacons
             if (a != null && b == null)
                 return false;
 
-            return a.MaxAverRssi <= b.MaxAverRssi;
+            return a.ValueToCompare <= b.ValueToCompare;
         }
 
         public static bool operator >=(BeaconInfoGroup a, BeaconInfoGroup b)
@@ -174,7 +173,7 @@ namespace Trigger.Beacons
             if (a != null && b == null)
                 return true;
 
-            return a.MaxAverRssi >= b.MaxAverRssi;
+            return a.ValueToCompare >= b.ValueToCompare;
         }
 
         public static BeaconInfoGroup Max(params BeaconInfoGroup[] items)

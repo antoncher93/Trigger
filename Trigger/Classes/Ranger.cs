@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Trigger.Beacons;
 using Trigger.Classes;
+using Trigger.Classes.Logging;
 using Trigger.Enums;
 using Trigger.Interfaces;
 using Trigger.Signal;
@@ -28,6 +29,8 @@ namespace Trigger
         
         private AppearStatus _status = AppearStatus.Unknown;
         private DateTime _currentTime;
+        internal ILogger _logger;
+
         #endregion
 
         internal void ChangeStatus(AppearStatus value)
@@ -113,11 +116,11 @@ namespace Trigger
 
             _currentTime = actualTime;
 
-            if(_secondLineInfo.MaxAverRssi > _firstLineInfo.MaxAverRssi)
+            if(_secondLineInfo > _firstLineInfo)
             {
                 ChangeStatus(AppearStatus.Inside);
             }
-            else if(_firstLineInfo.MaxAverRssi > _secondLineInfo.MaxAverRssi)
+            else if(_firstLineInfo > _secondLineInfo)
             {
                 ChangeStatus(AppearStatus.Outside);
             }
@@ -139,10 +142,13 @@ namespace Trigger
                     var res = group.FirstOrDefault(b => string.Equals(b.MacAddress, macAddr, StringComparison.InvariantCultureIgnoreCase));
                     if (res == null)
                     {
-                        res = new BeaconInfo(macAddr, _actualSignalPeriod);
+                        res = _logger == null ? 
+                        new BeaconInfo(macAddr, _actualSignalPeriod) 
+                        : new BeaconInfo(macAddr, _actualSignalPeriod, _logger);
+
                         group.Add(res);
                     }
-                    res.SetLastRssi(beacon);
+                    res.Add(beacon);
                     return;
                 }
             };

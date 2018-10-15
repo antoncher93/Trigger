@@ -31,7 +31,7 @@ namespace Trigger.Classes
                   {
                       RangerBuilder builder = new RangerBuilder()
                           .SetAPointUid(key)
-                          .SetCalcSlideAverageCount(_rangerSettings.GetSlideAverageCount(key));
+                          .SetLogger(_rangerSettings.GetLogger());
 
                       Action<BeaconLine, Action<IBeaconBody>> fillLine = (type, action) =>
                       {
