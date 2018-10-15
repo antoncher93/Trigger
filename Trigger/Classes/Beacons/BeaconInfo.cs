@@ -29,7 +29,7 @@ namespace Trigger.Beacons
                     return summ / (double)_signals.Count;
                 }
 
-                return -199;
+                return -double.MinValue;
             }
         }
 
