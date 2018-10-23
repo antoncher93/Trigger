@@ -11,21 +11,21 @@ using Trigger.Enums;
 
 namespace Trigger.Signal
 {
-    public class Telemetry : Dictionary<string, AccessPoint>
+    public sealed class Telemetry : Dictionary<string, AccessPointData>
     {
         [JsonProperty(Order = 1)]  
         public string UserId { get; set; }
 
-        public Telemetry Add(AccessPoint point)
+        public Telemetry Add(AccessPointData point)
         {
-            Add(point.Uid, point);
+            Add(point.AccessPointUid, point);
             return this;
         }
 
-        public Telemetry AddRange(params AccessPoint[] points)
+        public Telemetry AddRange(params AccessPointData[] points)
         {
             foreach (var p in points)
-                Add(p.Uid, p);
+                Add(p.AccessPointUid, p);
 
             return this;
         }
@@ -67,26 +67,24 @@ namespace Trigger.Signal
             return new Telemetry
             {
                 Type = TelemetryType.FromUser,
-
-                    UserId = userId
-   
+                UserId = userId
             };
         }
 
-        public void NewBeacon(string mac, int rssi, string apointUid, DateTime time)
+        public void NewBeacon(MacAddress mac, int rssi, string apointUid, DateTime time)
         {
-            AccessPoint apoint = null;
+            AccessPointData apoint = null;
             if (!this.ContainsKey(apointUid))
             {
-                apoint = AccessPoint.FromUid(apointUid);
+                apoint = AccessPointData.FromUid(apointUid);
                 this.Add(apoint);
             }
             apoint = this[apointUid];
 
-            var beacon = apoint.Beacons.FirstOrDefault(b => b.Mac == mac);
+            var beacon = apoint.Beacons.FirstOrDefault(b => b.Address == mac);
             if (beacon == null)
             {
-                beacon = Beacon.FromMac(mac);
+                beacon = BeaconData.FromMac(mac);
                 apoint.Beacons.Add(beacon);
             }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using Trigger.Classes.Logging;
+using Trigger.Classes;
 
 namespace Trigger.Beacons
 {
@@ -54,19 +55,13 @@ namespace Trigger.Beacons
 
         #endregion
 
-
         private ILogger _logger;
         public int ActualPeriod { get; set; } = 1000;
-        public BeaconInfoGroup()
-        {
-            
-        }
 
-        public BeaconInfoGroup(ILogger logger)
+        public BeaconInfoGroup(ILogger logger = null)
         {
             _logger = logger;
         }
-
 
         //public bool Changed { get; private set; } = false;
         /// <summary>
@@ -74,9 +69,10 @@ namespace Trigger.Beacons
         /// </summary>
         /// <param name="macAddress">Beacon mac</param>
         /// <param name="beacon"></param>
-        public void SetRssiValue(string macAddress, BeaconItem beacon)
+        public void SetRssiValue(MacAddress macAddress, BeaconItem beacon)
         {
-            var foundbeacon = beacons.FirstOrDefault(b => string.Equals(b.MacAddress, macAddress, StringComparison.CurrentCultureIgnoreCase));
+            var foundbeacon = beacons.FirstOrDefault(b => b.Address == macAddress);
+
             if (foundbeacon == null)
             {
                 foundbeacon = new BeaconInfo(macAddress, ActualPeriod);

@@ -8,26 +8,26 @@ using Trigger.Signal;
 
 namespace Trigger.Classes
 {
-    public class AccessPoint
+    public class AccessPointData
     {
         [JsonIgnore]
-        public string Uid { get; set; }
-        public IList<Beacon> Beacons { get; set; } = new List<Beacon>();
-        public static AccessPoint FromUid(string uid)
+        public string AccessPointUid { get; set; }
+        public IList<BeaconData> Beacons { get; set; } = new List<BeaconData>();
+        public static AccessPointData FromUid(string uid)
         {
-            return new AccessPoint
+            return new AccessPointData
             {
-                Uid = uid,
-                Beacons = new List<Beacon>()
+                AccessPointUid = uid,
+                Beacons = new List<BeaconData>()
             };
         }
-        public void Append(AccessPoint apoint)
+        public void Append(AccessPointData apoint)
         {
-            if (string.Equals(Uid, apoint.Uid, StringComparison.CurrentCultureIgnoreCase))
+            if (string.Equals(AccessPointUid, apoint.AccessPointUid, StringComparison.CurrentCultureIgnoreCase))
             {
                 foreach (var beacon in apoint.Beacons)
                 {
-                    Beacon res = Beacons.FirstOrDefault(b => string.Equals(b.Mac, beacon.Mac, StringComparison.CurrentCultureIgnoreCase));
+                    BeaconData res = Beacons.FirstOrDefault(b => string.Equals(b.Address, beacon.Address, StringComparison.CurrentCultureIgnoreCase));
                     if (res == null)
                     {
                         Beacons.Add(beacon);

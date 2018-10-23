@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Trigger.Beacons;
 using Trigger.Classes.Beacons;
 using Trigger.Signal;
@@ -41,7 +39,7 @@ namespace Trigger.Classes
                 foreach (var b in a.Value.Beacons)
                 {
                     writer.WriteStartObject();
-                    writer.WritePropertyName(b.Mac); // Beacon mac address
+                    writer.WritePropertyName(b.Address); // Beacon mac address
 
                     writer.WriteStartArray();
                     foreach (var bi in b)
@@ -92,11 +90,11 @@ namespace Trigger.Classes
                             {
                                 foreach (JProperty ap in j.Value.Children<JObject>().Children())
                                 {
-                                    AccessPoint point = new AccessPoint { Uid = ap.Name };
+                                    AccessPointData point = new AccessPointData { AccessPointUid = ap.Name };
 
                                     foreach (JProperty b in ap.Value.Children<JObject>().Children())
                                     {
-                                        Beacon beacon = new Beacon { Mac = b.Name };
+                                        BeaconData beacon = new BeaconData { Address = b.Name };
 
                                         foreach (JToken bi in b.Value.Children<JToken>())
                                         {

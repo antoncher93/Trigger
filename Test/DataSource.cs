@@ -25,12 +25,12 @@ namespace Trigger.Test
                         UserId = NewGuid()
                     }.AddRange(new[]
                                  {
-                                 new AccessPoint
+                                 new AccessPointData
                                  {
-                                      Uid = NewGuid(),
-                                      Beacons = new Beacon[]
+                                      AccessPointUid = NewGuid(),
+                                      Beacons = new BeaconData[]
                                       {
-                                          new Beacon
+                                          new BeaconData
                                           {
                                                Mac = "c9:18:b1:cf:9b:50",
                                           }.Add(
@@ -54,7 +54,7 @@ namespace Trigger.Test
                                                         Rssi = - rand.Next(20, 140),
                                                         Time = RandDateTime(rand)
                                                     }),
-                                          new Beacon
+                                          new BeaconData
                                           {
                                                Mac = "e3:25:3e:0a:7e:4c",
 
@@ -79,7 +79,7 @@ namespace Trigger.Test
                                                         Rssi = - rand.Next(20, 140),
                                                         Time = RandDateTime(rand)
                                                     }),
-                                          new Beacon
+                                          new BeaconData
                                           {
                                                Mac = "de:a6:78:08:52:a2",
                                           }.Add(
@@ -103,7 +103,7 @@ namespace Trigger.Test
                                                         Rssi = - rand.Next(20, 140),
                                                         Time = RandDateTime(rand)
                                                     }),
-                                          new Beacon
+                                          new BeaconData
                                           {
                                                Mac = "c1:11:11:1b:11:1a"
 
@@ -128,7 +128,7 @@ namespace Trigger.Test
                                                         Rssi = - rand.Next(20, 140),
                                                         Time = RandDateTime(rand)
                                                     }),
-                                          new Beacon
+                                          new BeaconData
                                           {
                                                Mac = "fd:3a:73:b7:54:ba"
 
