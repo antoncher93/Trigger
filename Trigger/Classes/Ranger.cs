@@ -167,7 +167,8 @@ namespace Trigger
 
         public bool IsObsolete()
         {
-            throw new NotImplementedException();
+            return false;
+            //  throw new NotImplementedException();
         }
         #endregion
     }

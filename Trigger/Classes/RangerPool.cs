@@ -30,8 +30,8 @@ namespace Trigger.Classes
                 return GetOrAdd(key, (k) =>
                   {
                       RangerBuilder builder = new RangerBuilder()
-                          .SetAPointUid(key)
-                          .SetLogger(_rangerSettings.GetLogger());
+                          .SetAPointUid(key);
+                       //   .SetLogger(_rangerSettings.GetLogger());
 
                       Action<BeaconLine, Action<IBeaconBody>> fillLine = (type, action) =>
                       {

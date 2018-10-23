@@ -10,7 +10,7 @@ namespace Trigger.Interfaces
     public interface IRangerSettings
     {
         IEnumerable<IBeaconBody> GetBeacons(string accessPoint, BeaconLine line);
-        int GetActualPeriod();
-        ILogger GetLogger();
+   //     int GetActualPeriod();
+      //  ILogger GetLogger();
     }
 }

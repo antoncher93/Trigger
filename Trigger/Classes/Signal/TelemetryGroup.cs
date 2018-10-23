@@ -9,6 +9,10 @@ namespace Trigger.Signal
     {
         public void Add(Telemetry item)
         {
+            // HardCoded
+            if (item.UserId == null)
+                item.UserId = "19377fca-2d5f-4d8a-85f6-8adb0a1e8e12";
+                
             AddOrUpdate(item.UserId, item, (userId, telemetry) =>
             {
                 Telemetry existed = this[item.UserId];
