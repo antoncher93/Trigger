@@ -2,6 +2,7 @@ using System;
 using Trigger.Beacons;
 using Trigger.Classes;
 using Trigger.Classes.Beacons;
+using Trigger.Classes.Logging;
 using Trigger.Interfaces;
 using Trigger.Signal;
 using Xunit;
@@ -50,6 +51,37 @@ namespace Trigger.Test
                 };
                 ranger.CheckTelemetry(telemetry);
             }
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void DirectTriggerTest()
+        {
+            bool result = false;
+            int count = 0;
+            IRanger ranger = new DirectRanger(
+                BeaconBody.FromMac("de:a6:78:08:52:a2"), 
+                BeaconBody.FromMac("c9:18:b1:cf:9b:50"), 
+                500, 
+                new DBLogger());
+
+            ranger.OnEvent += (s, e) =>
+            {
+                switch (e.Type)
+                {
+                    case Enums.TriggerEventType.Enter:
+                        result = true;
+                        break;
+                    case Enums.TriggerEventType.Exit:
+                        result = false;
+                        break;
+                }
+                count++;
+            };
+            Telemetry telemetry = DataSource.GetTelemetryFromResource();
+
+            ranger.CheckTelemetry(telemetry);
 
             Assert.True(result);
         }

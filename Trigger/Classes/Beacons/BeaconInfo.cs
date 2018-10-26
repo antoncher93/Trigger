@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Timers;
+using Trigger.Classes;
 using Trigger.Classes.Beacons;
 using Trigger.Classes.Logging;
 
@@ -14,6 +15,7 @@ namespace Trigger.Beacons
         public string MacAddress { get; private set; }
         private ILogger _logger;
         public TimeSpan ActualPeriod { get; set; }
+        public int TxPower { get; set; } = -40;
 
         public double AverageRssi
         {
@@ -29,12 +31,13 @@ namespace Trigger.Beacons
                     return summ / (double)_signals.Count;
                 }
 
-                return -double.MinValue;
+                return double.MinValue;
             }
         }
 
+        public double Distance => Calculator.BeaconDiastance(AverageRssi, TxPower);
+
         private string _rssi_to_set = "";
-       
 
         public int Count => _signals.Count;
 
@@ -72,11 +75,11 @@ namespace Trigger.Beacons
                 }
             }
 
-            _logger?.Log(new string[] {actualTime.TimeOfDay.ToString(), MacAddress, _rssi_to_set,  AverageRssi.ToString()});
+            _logger?.Log(new string[] {actualTime.TimeOfDay.ToString(), MacAddress, _rssi_to_set,  AverageRssi.ToString(), Distance.ToString()});
             _rssi_to_set = "";
         }
 
-       
+        #region ICollection
 
         public void Clear()
         {
@@ -107,6 +110,10 @@ namespace Trigger.Beacons
         {
             return _signals.GetEnumerator();
         }
+
+#endregion
+
+
     }
 
 
