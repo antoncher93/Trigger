@@ -10,9 +10,24 @@ namespace Trigger.Classes
 {
     public class AccessPointData
     {
+        #region Variables
         [JsonIgnore]
         public string AccessPointUid { get; set; }
+
         public IList<BeaconData> Beacons { get; set; } = new List<BeaconData>();
+        #endregion
+
+        public DateTime? LastTimestamp
+        {
+            get
+            {
+                if (!Beacons.Any() || !Beacons.First().Any())
+                    return null;
+
+                return Beacons.SelectMany(b => b.Select(bi => bi.Time)).Max();
+            }
+        }
+
         public static AccessPointData FromUid(string uid)
         {
             return new AccessPointData
@@ -21,23 +36,25 @@ namespace Trigger.Classes
                 Beacons = new List<BeaconData>()
             };
         }
+
         public void Append(AccessPointData apoint)
         {
-            if (string.Equals(AccessPointUid, apoint.AccessPointUid, StringComparison.CurrentCultureIgnoreCase))
+            if (!string.Equals(AccessPointUid, apoint.AccessPointUid, StringComparison.CurrentCultureIgnoreCase))
+                return;
+
+            foreach (var beacon in apoint.Beacons)
             {
-                foreach (var beacon in apoint.Beacons)
+                BeaconData res = Beacons.FirstOrDefault(b => string.Equals(b.Address, beacon.Address, StringComparison.CurrentCultureIgnoreCase));
+                if (res == null)
                 {
-                    BeaconData res = Beacons.FirstOrDefault(b => string.Equals(b.Address, beacon.Address, StringComparison.CurrentCultureIgnoreCase));
-                    if (res == null)
-                    {
-                        Beacons.Add(beacon);
-                    }
-                    else
-                    {
-                        res.Append(beacon);
-                    }
+                    Beacons.Add(beacon);
+                }
+                else
+                {
+                    res.Append(beacon);
                 }
             }
         }
+
     }
 }

@@ -12,6 +12,8 @@ namespace Trigger
 {
     public class Ranger : IRanger
     {
+        private IDisposable unsubscriber;
+
         #region Variables
         internal int slideAverageCount = 5;
         internal int rssiBarier = 0;
@@ -43,21 +45,23 @@ namespace Trigger
                 OnEvent?.Invoke(this, new TriggerEventArgs
                 {
                     AccessPointUid = apoint.AccessPointUid,
-                    DateTime = _currentTime,
+                    Timespan = _currentTime,
                     UserId = _userUid,
                     Type = (value == AppearStatus.Inside ? TriggerEventType.Enter : TriggerEventType.Exit)
                 });
 
             }
             _status = value;
-
         }
 
         public event EventHandler<TriggerEventArgs> OnEvent;
 
         #region Methods
-        public void CheckTelemetry(Telemetry telemetry)
+        private void ProduceEvent(Telemetry telemetry)
         {
+            if (!telemetry.Contains(apoint.AccessPointUid))
+                return;
+
             _userUid = telemetry.UserId;
 
             BeaconItem prevSignal = BeaconItem.Default;
@@ -184,6 +188,32 @@ namespace Trigger
         {
             return false;
             //  throw new NotImplementedException();
+        }
+
+        public void OnCompleted()
+        {
+            this.Unsubscribe();
+        }
+
+        public void OnError(Exception error)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnNext(Telemetry value)
+        {
+            ProduceEvent(value);
+        }
+
+        public virtual void Unsubscribe()
+        {
+            unsubscriber.Dispose();
+        }
+
+        public void Subscribe(IObservable<Telemetry> provider)
+        {
+            if (provider != null)
+                unsubscriber = provider.Subscribe(this);
         }
         #endregion
     }

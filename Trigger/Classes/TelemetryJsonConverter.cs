@@ -33,10 +33,10 @@ namespace Trigger.Classes
             foreach (var a in tel)
             {
                 writer.WriteStartObject();
-                writer.WritePropertyName(a.Key); // Access point
+                writer.WritePropertyName(a.AccessPointUid); // Access point
 
                 writer.WriteStartArray();
-                foreach (var b in a.Value.Beacons)
+                foreach (var b in a.Beacons)
                 {
                     writer.WriteStartObject();
                     writer.WritePropertyName(b.Address); // Beacon mac address
