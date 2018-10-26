@@ -24,7 +24,7 @@ namespace Trigger.Test
             string apointUid = "apoint";
             DateTime time = DateTime.Now;
 
-            telemetry.NewBeacon(mac, rssi, apointUid, time);
+           // telemetry.NewBeacon(mac, rssi, apointUid, time);
 
             // Validate
 
