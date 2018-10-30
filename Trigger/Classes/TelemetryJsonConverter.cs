@@ -38,26 +38,18 @@ namespace Trigger.Classes
             foreach (var a in tel)
             {
                 writer.WriteStartObject();
-                writer.WritePropertyName(a.Key); // Access point
+                writer.WritePropertyName(a.Key); // Beacon
 
                 writer.WriteStartArray();
-                foreach (var b in a.Value.Beacons)
+                foreach (var s in a.Value)
                 {
-                    writer.WriteStartObject();
-                    writer.WritePropertyName(b.Mac); // Beacon mac address
 
-                    writer.WriteStartArray();
-                    foreach (var bi in b)
-                    {
-                        writer.WriteValue(bi.ToCompact(offset));
-                        //writer.WriteStartObject();
-                        //writer.WritePropertyName(bi.Time.ToString());
-                        //writer.WriteValue(Math.Abs(bi.Rssi));
-                        //writer.WriteEndObject();
-                    }
-                    writer.WriteEndArray();
+                    writer.WriteValue(s.ToCompact(offset));
+                    //writer.WriteStartObject();
+                    //writer.WritePropertyName(bi.Time.ToString());
+                    //writer.WriteValue(Math.Abs(bi.Rssi));
+                    //writer.WriteEndObject();
 
-                    writer.WriteEndObject();
                 }
                 writer.WriteEndArray();
 
@@ -93,24 +85,17 @@ namespace Trigger.Classes
                             }
                             else if (string.Equals(j.Name, "telemetry", StringComparison.InvariantCultureIgnoreCase))
                             {
-                                foreach (JProperty ap in j.Value.Children<JObject>().Children())
+                                foreach (JProperty bi in j.Value.Children<JObject>().Children())
                                 {
-                                    AccessPoint point = new AccessPoint { Uid = ap.Name };
+                                    Beacon beacon = Beacon.FromMac(bi.Name);
 
-                                    foreach (JProperty b in ap.Value.Children<JObject>().Children())
+                                    foreach (JProperty s in bi.Value.Children<JObject>().Children())
                                     {
-                                        Beacon beacon = new Beacon { Mac = b.Name };
-
-                                        foreach (JToken bi in b.Value.Children<JToken>())
-                                        {
-                                            BeaconItem item = BeaconItem.FromCompact(bi.Value<long>(), offset);
-                                            beacon.Add(item);
-                                        }
-
-                                        point.Beacons.Add(beacon);
+                                        BeaconItem item = BeaconItem.FromCompact(bi.Value<long>(), offset);
+                                        beacon.Add(item);
                                     }
 
-                                    result.Add(point);
+                                    result.Add(beacon);
                                 }
                             }
                         }

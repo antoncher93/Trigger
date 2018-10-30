@@ -11,21 +11,21 @@ using Trigger.Enums;
 
 namespace Trigger.Signal
 {
-    public class Telemetry : Dictionary<string, AccessPoint>
+    public class Telemetry : Dictionary<string, Beacon>
     {
         [JsonProperty(Order = 1)]  
         public string UserId { get; set; }
 
-        public Telemetry Add(AccessPoint point)
+        public Telemetry Add(Beacon beacon)
         {
-            Add(point.Uid, point);
+            Add(beacon.Mac, beacon);
             return this;
         }
 
-        public Telemetry AddRange(params AccessPoint[] points)
+        public Telemetry AddRange(params Beacon[] beacons)
         {
-            foreach (var p in points)
-                Add(p.Uid, p);
+            foreach (var b in beacons)
+                Add(b.Mac, b);
 
             return this;
         }
@@ -36,11 +36,10 @@ namespace Trigger.Signal
         {
             get
             {
-                return Values.SelectMany(a => a.Beacons.SelectMany(b => b.Select(bi => bi.Time))).Min();
+                return Values.SelectMany(b => b.Select(bi => bi.Time)).Min();
             }
         }
 
-        private DateTime _lastSignalTime;
 
         public void Append(Telemetry telemetry)
         {
@@ -73,23 +72,15 @@ namespace Trigger.Signal
             };
         }
 
-        public void NewBeacon(string mac, int rssi, string apointUid, DateTime time)
+        public void NewBeacon(string mac, int rssi, DateTime time)
         {
-            AccessPoint apoint = null;
-            if (!this.ContainsKey(apointUid))
-            {
-                apoint = AccessPoint.FromUid(apointUid);
-                this.Add(apoint);
-            }
-            apoint = this[apointUid];
-
-            var beacon = apoint.Beacons.FirstOrDefault(b => b.Mac == mac);
-            if (beacon == null)
+            Beacon beacon = null;
+            if (!this.ContainsKey(mac))
             {
                 beacon = Beacon.FromMac(mac);
-                apoint.Beacons.Add(beacon);
+                this.Add(beacon);
             }
-
+            beacon = this[mac];
             beacon.Add(new BeaconItem { Rssi = rssi, Time = time });
           //  var rssivalue = beacon.FirstOrDefault(v => v.Time == time);
          //   if (rssivalue == null)
