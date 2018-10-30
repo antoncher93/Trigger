@@ -23,6 +23,8 @@ namespace Trigger.Classes
             writer.WritePropertyName("data");
             writer.WriteStartObject();
 
+            writer.WritePropertyName("user_id");
+            writer.WriteValue(tel.UserId);
 
             writer.WritePropertyName("timeoffset");
             writer.WriteValue(offset.Ticks);
