@@ -8,6 +8,11 @@ namespace Trigger.Signal
         public TriggerEventType Type { get; set; }
         public string AccessPointUid { get; set; }
         public string UserId { get; set; }
-        public DateTime DateTime { get; set; }
+        public DateTime Timespan { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Timespan.ToString("HH:mm:ss.fff")}: {Type}";
+        }
     }
 }

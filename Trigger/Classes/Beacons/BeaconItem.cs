@@ -41,5 +41,10 @@ namespace Trigger.Beacons
 
             return Math.Abs((long)Rssi) * 1000000000 + delta;
         }
+
+        public override string ToString()
+        {
+            return $"{Rssi} {Time.ToString("hh:mm:ss.fff")}";
+        }
     }
 }

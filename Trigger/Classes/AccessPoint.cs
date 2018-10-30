@@ -8,36 +8,53 @@ using Trigger.Signal;
 
 namespace Trigger.Classes
 {
-    public class AccessPoint
+    public class AccessPointData
     {
+        #region Variables
         [JsonIgnore]
-        public string Uid { get; set; }
-        public IList<Beacon> Beacons { get; set; } = new List<Beacon>();
-        public static AccessPoint FromUid(string uid)
+        public string AccessPointUid { get; set; }
+
+        public IList<BeaconData> Beacons { get; set; } = new List<BeaconData>();
+        #endregion
+
+        public DateTime? LastTimestamp
         {
-            return new AccessPoint
+            get
             {
-                Uid = uid,
-                Beacons = new List<Beacon>()
+                if (!Beacons.Any() || !Beacons.First().Any())
+                    return null;
+
+                return Beacons.SelectMany(b => b.Select(bi => bi.Time)).Max();
+            }
+        }
+
+        public static AccessPointData FromUid(string uid)
+        {
+            return new AccessPointData
+            {
+                AccessPointUid = uid,
+                Beacons = new List<BeaconData>()
             };
         }
-        public void Append(AccessPoint apoint)
+
+        public void Append(AccessPointData apoint)
         {
-            if (string.Equals(Uid, apoint.Uid, StringComparison.CurrentCultureIgnoreCase))
+            if (!string.Equals(AccessPointUid, apoint.AccessPointUid, StringComparison.CurrentCultureIgnoreCase))
+                return;
+
+            foreach (var beacon in apoint.Beacons)
             {
-                foreach (var beacon in apoint.Beacons)
+                BeaconData res = Beacons.FirstOrDefault(b => string.Equals(b.Address, beacon.Address, StringComparison.CurrentCultureIgnoreCase));
+                if (res == null)
                 {
-                    Beacon res = Beacons.FirstOrDefault(b => string.Equals(b.Mac, beacon.Mac, StringComparison.CurrentCultureIgnoreCase));
-                    if (res == null)
-                    {
-                        Beacons.Add(beacon);
-                    }
-                    else
-                    {
-                        res.Append(beacon);
-                    }
+                    Beacons.Add(beacon);
+                }
+                else
+                {
+                    res.Append(beacon);
                 }
             }
         }
+
     }
 }

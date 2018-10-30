@@ -1,33 +1,59 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Trigger.Beacons;
+using System.Text;
 using Trigger.Classes;
-using Trigger.Classes.Beacons;
 using Trigger.Enums;
 
 namespace Trigger.Signal
 {
-    public class Telemetry : Dictionary<string, Beacon>
+    public sealed class Telemetry : ICollection<AccessPointData>
     {
-        [JsonProperty(Order = 1)]  
+        private IList<AccessPointData> _items = new List<AccessPointData>();
+
+        [JsonProperty(Order = 1)]
         public string UserId { get; set; }
 
-        public Telemetry Add(Beacon beacon)
+        public DateTime? LastTimestamp
         {
-            Add(beacon.Mac, beacon);
-            return this;
+            get
+            {
+                DateTime? result = null;
+
+                foreach (var d in this)
+                {
+                    var unitTimespan = d.LastTimestamp;
+
+                    result = unitTimespan.HasValue && (unitTimespan > result || !result.HasValue) ?
+                        unitTimespan : result;
+                }
+
+                return result;
+            }
         }
 
-        public Telemetry AddRange(params Beacon[] beacons)
+        public bool Contains(string pointUid)
         {
-            foreach (var b in beacons)
-                Add(b.Mac, b);
+            return _items.Any(x => string.Equals(x.AccessPointUid, pointUid, StringComparison.InvariantCultureIgnoreCase));
+        }
 
-            return this;
+        public AccessPointData this[string pointUid]
+        {
+            get
+            {
+                return _items.FirstOrDefault(x => string.Equals(x.AccessPointUid, pointUid, StringComparison.InvariantCultureIgnoreCase));
+            }
+        }
+
+        public void Add(AccessPointData point)
+        {
+            var existedPoint = this[point.AccessPointUid];
+
+            if (existedPoint != null)
+                existedPoint.Append(point);
+            else _items.Add(point);
         }
 
         public TelemetryType Type { get; set; } = TelemetryType.FromUser;
@@ -36,10 +62,9 @@ namespace Trigger.Signal
         {
             get
             {
-                return Values.SelectMany(b => b.Select(bi => bi.Time)).Min();
+                return _items.SelectMany(a => a.Beacons.SelectMany(b => b.Select(bi => bi.Time))).Min();
             }
         }
-
 
         public void Append(Telemetry telemetry)
         {
@@ -48,16 +73,10 @@ namespace Trigger.Signal
 
             foreach (var apoint in telemetry)
             {
-                this[apoint.Key].Append(apoint.Value);
-                //AccessPoint res = Data.FirstOrDefault(ap => string.Equals(ap.Uid, apoint.Uid));
-                //if(res == null)
-                //{
-                //    Data.APoints.Add(apoint);
-                //}
-                //else
-                //{
-                //    res.Append(apoint);
-                //}
+                var point = this[apoint.AccessPointUid];
+                if (point != null)
+                    point.Append(apoint);
+                else _items.Add(apoint);
             }
         }
 
@@ -66,34 +85,86 @@ namespace Trigger.Signal
             return new Telemetry
             {
                 Type = TelemetryType.FromUser,
-
-                    UserId = userId
-   
+                UserId = userId
             };
         }
 
-        public void NewBeacon(string mac, int rssi, DateTime time)
+        public void Clear()
         {
-            Beacon beacon = null;
-            if (!this.ContainsKey(mac))
-            {
-                beacon = Beacon.FromMac(mac);
-                this.Add(beacon);
-            }
-            beacon = this[mac];
-            beacon.Add(new BeaconItem { Rssi = rssi, Time = time });
-          //  var rssivalue = beacon.FirstOrDefault(v => v.Time == time);
-         //   if (rssivalue == null)
-         //   {
-          //      rssivalue = new BeaconItem { Rssi = rssi, Time = time };
-          //      beacon.Add(rssivalue);
-          //      _lastSignalTime = time;
-          //  }
+            _items.Clear();
+        }
+
+        public bool Contains(AccessPointData item)
+        {
+            return _items.Contains(item);
+        }
+
+        public void CopyTo(AccessPointData[] array, int arrayIndex)
+        {
+            _items.CopyTo(array, arrayIndex);
+        }
+
+        public bool Remove(AccessPointData item)
+        {
+            return _items.Remove(item);
+        }
+
+        public IEnumerator<AccessPointData> GetEnumerator()
+        {
+            return _items.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _items.GetEnumerator();
         }
 
         public static implicit operator Telemetry(string s)
         {
-            return JsonConvert.DeserializeObject<Telemetry>(s);
+            return JsonConvert.DeserializeObject<Telemetry>(s, new TelemetryJsonConverter());
         }
+
+        public string Protocol
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+
+                foreach (var apointData in this)
+                {
+                    sb.AppendLine($"Access point {apointData.AccessPointUid}:{Environment.NewLine}");
+
+                    sb.AppendLine("Time");
+                    foreach (var beacon in apointData.Beacons)
+                        sb.Append($"\t{beacon.Address}");
+
+                    sb.AppendLine();
+
+                    IEnumerable<DateTime> timeLines = apointData.Beacons.SelectMany(b => b.Select(bi => bi.Time)).Distinct().OrderBy(x => x);
+                    DateTime minTime = timeLines.Min();
+
+                    foreach (var time in timeLines)
+                    {
+                        sb.Append($"{Math.Round((time - minTime).TotalSeconds, 2)}\t");
+
+                        foreach (var beacon in apointData.Beacons)
+                        {
+                            var bItem = beacon.FirstOrDefault(bi => bi.Time == time);
+                            sb.Append($"{(bItem.Rssi != 0 ? bItem.Rssi.ToString() : "")}\t");
+                        }
+
+                        sb.AppendLine();
+                    }
+
+                    sb.AppendLine();
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        public int Count => _items.Count;
+
+        public bool IsReadOnly => _items.IsReadOnly;
     }
 }
