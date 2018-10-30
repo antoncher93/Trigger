@@ -6,12 +6,13 @@ using System.Linq;
 using System.Text;
 using Trigger.Classes;
 using Trigger.Enums;
+using Trigger.Classes.Beacons;
 
 namespace Trigger.Signal
 {
-    public sealed class Telemetry : ICollection<AccessPointData>
+    public sealed class Telemetry : ICollection<BeaconData>
     {
-        private IList<AccessPointData> _items = new List<AccessPointData>();
+        private IList<BeaconData> _items = new List<BeaconData>();
 
         [JsonProperty(Order = 1)]
         public string UserId { get; set; }
@@ -20,40 +21,43 @@ namespace Trigger.Signal
         {
             get
             {
-                DateTime? result = null;
+                if (!_items.Any() || !_items.First().Any())
+                    return null;
 
-                foreach (var d in this)
-                {
-                    var unitTimespan = d.LastTimestamp;
-
-                    result = unitTimespan.HasValue && (unitTimespan > result || !result.HasValue) ?
-                        unitTimespan : result;
-                }
-
-                return result;
+                return _items.SelectMany(b => b.Select(bi => bi.Time)).Max();
             }
         }
 
-        public bool Contains(string pointUid)
+        public bool Contains(string address)
         {
-            return _items.Any(x => string.Equals(x.AccessPointUid, pointUid, StringComparison.InvariantCultureIgnoreCase));
+            return _items.Any(x => string.Equals(x.Address, address, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        public AccessPointData this[string pointUid]
+        public BeaconData this[string address]
         {
             get
             {
-                return _items.FirstOrDefault(x => string.Equals(x.AccessPointUid, pointUid, StringComparison.InvariantCultureIgnoreCase));
+                return _items.FirstOrDefault(x => string.Equals(x.Address, address, StringComparison.InvariantCultureIgnoreCase));
             }
         }
 
-        public void Add(AccessPointData point)
+        public void Add(BeaconData beacon)
         {
-            var existedPoint = this[point.AccessPointUid];
+            var existedPoint = this[beacon.Address];
 
             if (existedPoint != null)
-                existedPoint.Append(point);
-            else _items.Add(point);
+                existedPoint.Append(beacon);
+            else _items.Add(beacon);
+        }
+
+        public Telemetry Append(BeaconData beacon)
+        {
+            var existedPoint = this[beacon.Address];
+
+            if (existedPoint != null)
+                existedPoint.Append(beacon);
+            else _items.Add(beacon);
+            return this;
         }
 
         public TelemetryType Type { get; set; } = TelemetryType.FromUser;
@@ -62,7 +66,7 @@ namespace Trigger.Signal
         {
             get
             {
-                return _items.SelectMany(a => a.Beacons.SelectMany(b => b.Select(bi => bi.Time))).Min();
+                return _items.SelectMany((b => b.Select(bi => bi.Time))).Min();
             }
         }
 
@@ -71,12 +75,12 @@ namespace Trigger.Signal
             if (!string.Equals(telemetry.UserId, UserId, StringComparison.CurrentCulture))
                 return;
 
-            foreach (var apoint in telemetry)
+            foreach (var beacon in telemetry)
             {
-                var point = this[apoint.AccessPointUid];
-                if (point != null)
-                    point.Append(apoint);
-                else _items.Add(apoint);
+                var b = this[beacon.Address];
+                if (b != null)
+                    b.Append(beacon);
+                else _items.Add(beacon);
             }
         }
 
@@ -94,22 +98,22 @@ namespace Trigger.Signal
             _items.Clear();
         }
 
-        public bool Contains(AccessPointData item)
+        public bool Contains(BeaconData item)
         {
             return _items.Contains(item);
         }
 
-        public void CopyTo(AccessPointData[] array, int arrayIndex)
+        public void CopyTo(BeaconData[] array, int arrayIndex)
         {
             _items.CopyTo(array, arrayIndex);
         }
 
-        public bool Remove(AccessPointData item)
+        public bool Remove(BeaconData item)
         {
             return _items.Remove(item);
         }
 
-        public IEnumerator<AccessPointData> GetEnumerator()
+        public IEnumerator<BeaconData> GetEnumerator()
         {
             return _items.GetEnumerator();
         }
@@ -130,30 +134,27 @@ namespace Trigger.Signal
             {
                 StringBuilder sb = new StringBuilder();
 
-                foreach (var apointData in this)
+                foreach (var beacon in this)
                 {
-                    sb.AppendLine($"Access point {apointData.AccessPointUid}:{Environment.NewLine}");
-
                     sb.AppendLine("Time");
-                    foreach (var beacon in apointData.Beacons)
-                        sb.Append($"\t{beacon.Address}");
-
                     sb.AppendLine();
+                    sb.AppendLine($"Access point {beacon.Address}:{Environment.NewLine}");
 
-                    IEnumerable<DateTime> timeLines = apointData.Beacons.SelectMany(b => b.Select(bi => bi.Time)).Distinct().OrderBy(x => x);
+                    IEnumerable<DateTime> timeLines = beacon.Select(bi => bi.Time).Distinct().OrderBy(x => x); //apointData.Beacons.SelectMany(b => b.Select(bi => bi.Time)).Distinct().OrderBy(x => x);
                     DateTime minTime = timeLines.Min();
 
                     foreach (var time in timeLines)
                     {
+                        var bItem = beacon.FirstOrDefault(bi => bi.Time == time);
                         sb.Append($"{Math.Round((time - minTime).TotalSeconds, 2)}\t");
+                        sb.Append($"{(bItem.Rssi != 0 ? bItem.Rssi.ToString() : "")}\t");
+                        //foreach (var beacon in apointData.Beacons)
+                        //{
+                        //    var bItem = beacon.FirstOrDefault(bi => bi.Time == time);
+                        //    sb.Append($"{(bItem.Rssi != 0 ? bItem.Rssi.ToString() : "")}\t");
+                        //}
 
-                        foreach (var beacon in apointData.Beacons)
-                        {
-                            var bItem = beacon.FirstOrDefault(bi => bi.Time == time);
-                            sb.Append($"{(bItem.Rssi != 0 ? bItem.Rssi.ToString() : "")}\t");
-                        }
-
-                        sb.AppendLine();
+                        //sb.AppendLine();
                     }
 
                     sb.AppendLine();

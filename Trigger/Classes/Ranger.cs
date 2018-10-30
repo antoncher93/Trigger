@@ -66,8 +66,7 @@ namespace Trigger
 
             BeaconItem prevSignal = BeaconItem.Default;
 
-            var data = telemetry[apoint.AccessPointUid].Beacons
-                .SelectMany(beacon => beacon.Select(beaconItem => new { mac = beacon.Address, Item = beaconItem })).OrderBy(x => x.Item.Time);
+            var data = telemetry.SelectMany(beacon => beacon.Select(beaconItem => new { mac = beacon.Address, Item = beaconItem })).OrderBy(x => x.Item.Time);
 
             if (!data.Any())
                 return;
@@ -158,7 +157,7 @@ namespace Trigger
                 {
                     flag = true;
 
-                    var res = group.FirstOrDefault(b => b.Address == macAddress);
+                    var res = group.FirstOrDefault(b => b.MacAddress == macAddress);
                     if (res == null)
                     {
                         res = _logger == null ?

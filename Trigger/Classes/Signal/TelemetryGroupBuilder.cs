@@ -38,10 +38,10 @@ namespace Trigger.Classes.Signal
         {
             _observers.Clear();
 
-            _observers =
-                _items.SelectMany(t => t.Select(a => a.AccessPointUid)).Distinct()
-                    .Select(aUid => getObserver(aUid))
-                    .ToList();
+            //_observers =
+            //    _items.SelectMany(t => t.Select(a => a.AccessPointUid)).Distinct()
+            //        .Select(aUid => getObserver(aUid))
+            //        .ToList();
 
             return this;
         }

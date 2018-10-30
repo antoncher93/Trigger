@@ -71,7 +71,7 @@ namespace Trigger.Beacons
         /// <param name="beacon"></param>
         public void SetRssiValue(MacAddress macAddress, BeaconItem beacon)
         {
-            var foundbeacon = beacons.FirstOrDefault(b => b.Address == macAddress);
+            var foundbeacon = beacons.FirstOrDefault(b => b.MacAddress == macAddress);
 
             if (foundbeacon == null)
             {

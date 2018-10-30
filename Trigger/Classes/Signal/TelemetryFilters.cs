@@ -18,13 +18,10 @@ namespace Trigger.Signal
         /// <returns></returns>
         public static IEnumerable<Telemetry> CutNoise(this IEnumerable<Telemetry> telemetry, IPointToBeaconMatcher matcher)
         {
-            foreach (var t in telemetry)
+            foreach(var t in telemetry)
             {
-                foreach (var ap in t)
-                {
-                    IEnumerable<MacAddress> beacons = matcher.GetBeacons(ap.AccessPointUid).Select(x => (MacAddress)x);
-                    ap.Beacons = ap.Beacons.Where(b => beacons.Contains(b.Address)).ToList();
-                }
+                IEnumerable<MacAddress> beacons = matcher.GetBeacons(t).Select(x => (MacAddress)x);
+                //ap.Beacons = ap.Beacons.Where(b => beacons.Contains(b.Address)).ToList();
 
                 yield return t;
             }

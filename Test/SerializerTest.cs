@@ -21,11 +21,11 @@ namespace Trigger.Test
             // Perform
             foreach (var t in group)
             {
-                string serialized = JsonConvert.SerializeObject(t.Value, new TelemetryJsonConverter());
+                string serialized = JsonConvert.SerializeObject(t, new TelemetryJsonConverter());
                 Telemetry deserialize = JsonConvert.DeserializeObject<Telemetry>(serialized, new TelemetryJsonConverter());
 
-                Assert.Equal(t.Value.Type, deserialize.Type);
-                Assert.Equal(t.Value.Count, deserialize.Count);
+                Assert.Equal(t.Type, deserialize.Type);
+                Assert.Equal(t.Count, deserialize.Count);
             }
         }
     }

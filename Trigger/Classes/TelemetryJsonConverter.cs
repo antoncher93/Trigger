@@ -35,13 +35,13 @@ namespace Trigger.Classes
             writer.WritePropertyName("telemetry");
             writer.WriteStartArray();
 
-            foreach (var a in tel)
+            foreach (var beac in tel)
             {
                 writer.WriteStartObject();
-                writer.WritePropertyName(a.Key); // Beacon
+                writer.WritePropertyName(beac.Address); // Beacon
 
                 writer.WriteStartArray();
-                foreach (var s in a.Value)
+                foreach (var s in beac)
                 {
 
                     writer.WriteValue(s.ToCompact(offset));
@@ -87,7 +87,7 @@ namespace Trigger.Classes
                             {
                                 foreach (JProperty bi in j.Value.Children<JObject>().Children())
                                 {
-                                    Beacon beacon = Beacon.FromMac(bi.Name);
+                                    BeaconData beacon = BeaconData.FromMac(bi.Name);
 
                                     foreach (JProperty s in bi.Value.Children<JObject>().Children())
                                     {

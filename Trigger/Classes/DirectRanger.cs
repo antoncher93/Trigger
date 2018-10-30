@@ -9,12 +9,11 @@ using Trigger.Classes.Logging;
 
 namespace Trigger.Classes
 {
-    public class DirectRanger : IRanger
+    public class DirectRanger// : IRanger
     {
         private BeaconInfo _beaconA;
         private BeaconInfo _beaconB;
 
-        internal AccessPoint _apoint = new AccessPoint { Uid = "test_default" };
         internal double _baseDistance = 3.0;
         internal ILogger _logger;
 
@@ -25,21 +24,21 @@ namespace Trigger.Classes
 
         public DirectRanger(IBeaconBody a, IBeaconBody b, int period)
         {
-            _beaconA = new BeaconInfo(a.Mac, period);
-            _beaconB = new BeaconInfo(b.Mac, period);
+            _beaconA = new BeaconInfo(a.Address, period);
+            _beaconB = new BeaconInfo(b.Address, period);
         }
 
         public DirectRanger(IBeaconBody a, IBeaconBody b, int period, ILogger logger)
         {
-            _beaconA = new BeaconInfo(a.Mac, period, logger);
-            _beaconB = new BeaconInfo(b.Mac, period, logger);
+            _beaconA = new BeaconInfo(a.Address, period, logger);
+            _beaconB = new BeaconInfo(b.Address, period, logger);
             _logger = logger;
         }
 
         public void CheckTelemetry(Telemetry telemetry)
         {
             var all_signals = telemetry.SelectMany(b => 
-                b.Value.Select(s => new { Mac = b.Key, Signal = s })).OrderBy(d => d.Signal.Time);
+                b.Select(s => new { Mac = b.Address, Signal = s })).OrderBy(d => d.Signal.Time);
 
             var current = all_signals.FirstOrDefault();
             while(current != null)
@@ -78,7 +77,7 @@ namespace Trigger.Classes
                 OnEvent?.Invoke(this, new TriggerEventArgs
                 {
                     Type = value == AppearStatus.Inside ? Enums.TriggerEventType.Enter : Enums.TriggerEventType.Exit,
-                    DateTime = currentTime
+                    Timespan = currentTime
                 });
             }
 
