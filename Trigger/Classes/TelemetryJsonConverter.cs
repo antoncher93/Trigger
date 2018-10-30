@@ -29,6 +29,9 @@ namespace Trigger.Classes
             writer.WritePropertyName("timeoffset");
             writer.WriteValue(offset.Ticks);
 
+            writer.WritePropertyName("user_id");
+            writer.WriteValue(tel.UserId);
+
             writer.WritePropertyName("telemetry");
             writer.WriteStartArray();
 
