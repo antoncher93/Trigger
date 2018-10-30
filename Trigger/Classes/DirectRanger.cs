@@ -38,8 +38,8 @@ namespace Trigger.Classes
 
         public void CheckTelemetry(Telemetry telemetry)
         {
-            var all_signals = telemetry[_apoint.Uid].Beacons.SelectMany(b => 
-            b.Select(s => new { Mac = b.Mac, Signal = s })).OrderBy(d => d.Signal.Time);
+            var all_signals = telemetry.SelectMany(b => 
+                b.Value.Select(s => new { Mac = b.Key, Signal = s })).OrderBy(d => d.Signal.Time);
 
             var current = all_signals.FirstOrDefault();
             while(current != null)

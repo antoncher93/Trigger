@@ -62,8 +62,8 @@ namespace Trigger
 
             BeaconItem prevSignal = BeaconItem.Default;
 
-            var data = telemetry[apoint.Uid].Beacons
-                .SelectMany(b => b.Select(bi => new { mac = b.Mac, Item = bi })).OrderBy(x => x.Item.Time);
+            var data = telemetry
+                .SelectMany(b => b.Value.Select(bi => new { mac = b.Key, Item = bi })).OrderBy(x => x.Item.Time);
 
             var any = data.Any();
             var fir = data.First();

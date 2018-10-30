@@ -25,12 +25,7 @@ namespace Trigger.Test
                         UserId = NewGuid()
                     }.AddRange(new[]
                                  {
-                                 new AccessPoint
-                                 {
-                                      Uid = NewGuid(),
-                                      Beacons = new Beacon[]
-                                      {
-                                          new Beacon
+                                 new Beacon
                                           {
                                                Mac = "c9:18:b1:cf:9b:50",
                                           }.Add(
@@ -154,8 +149,6 @@ namespace Trigger.Test
                                                         Rssi = - rand.Next(20, 140),
                                                         Time = RandDateTime(rand)
                                                     })
-                                      }
-                                 }
                         }));
 
                 return group;
