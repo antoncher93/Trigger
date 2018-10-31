@@ -22,7 +22,7 @@ namespace Trigger
         internal List<IBeaconBody> _secondLineBeacons { get; private set; } = new List<IBeaconBody>();
         internal List<IBeaconBody> _helpBeacons { get; private set; } = new List<IBeaconBody>();
         private string _userUid { get; set; }
-        internal AccessPointData apoint;
+        internal string _spaceUid;
         internal int _actualSignalPeriod = 1000;
 
         private BeaconInfoGroup _firstLineInfo = new BeaconInfoGroup();
@@ -44,7 +44,7 @@ namespace Trigger
             {
                 OnEvent?.Invoke(this, new TriggerEventArgs
                 {
-                    AccessPointUid = apoint.AccessPointUid,
+                    SpaceUid = _spaceUid,
                     Timespan = _currentTime,
                     UserId = _userUid,
                     Type = (value == AppearStatus.Inside ? TriggerEventType.Enter : TriggerEventType.Exit)
@@ -59,14 +59,16 @@ namespace Trigger
         #region Methods
         private void ProduceEvent(Telemetry telemetry)
         {
-            if (!telemetry.Contains(apoint.AccessPointUid))
+            Telemetry accessible = telemetry[_firstLineBeacons.Union(_secondLineBeacons).Union(_helpBeacons)];
+
+            if (!accessible.Any())
                 return;
 
-            _userUid = telemetry.UserId;
+            _userUid = accessible.UserId;
 
             BeaconItem prevSignal = BeaconItem.Default;
 
-            var data = telemetry.SelectMany(beacon => beacon.Select(beaconItem => new { mac = beacon.Address, Item = beaconItem })).OrderBy(x => x.Item.Time);
+            var data = accessible.SelectMany(beacon => beacon.Select(beaconItem => new { mac = beacon.Address, Item = beaconItem })).OrderBy(x => x.Item.Time);
 
             if (!data.Any())
                 return;
