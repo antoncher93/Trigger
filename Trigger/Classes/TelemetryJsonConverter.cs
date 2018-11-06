@@ -83,6 +83,10 @@ namespace Trigger.Classes
                             {
                                 offset = new DateTime().AddTicks(j.Value.Value<long>());
                             }
+                            else if (string.Equals(j.Name, "user_id", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                result.UserId = j.Value.Value<string>();
+                            }
                             else if (string.Equals(j.Name, "telemetry", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 foreach (JProperty bi in j.Value.Children<JObject>().Children())
