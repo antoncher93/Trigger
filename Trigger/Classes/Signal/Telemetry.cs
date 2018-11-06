@@ -17,6 +17,8 @@ namespace Trigger.Signal
         [JsonProperty(Order = 1)]
         public string UserId { get; set; }
 
+       
+
         public DateTime? LastTimestamp
         {
             get
@@ -49,6 +51,8 @@ namespace Trigger.Signal
                 existedPoint.Append(beacon);
             else _items.Add(beacon);
         }
+
+      
 
         public Telemetry Append(BeaconData beacon)
         {

@@ -32,6 +32,9 @@ namespace Trigger.Classes
             writer.WritePropertyName("user_id");
             writer.WriteValue(tel.UserId);
 
+            
+
+
             writer.WritePropertyName("telemetry");
             writer.WriteStartArray();
 

@@ -33,24 +33,24 @@ namespace Trigger.Test
             
             RangerPool pool = new RangerPool(new Dummy2RangerSettings());
 
-            foreach (var key in telemetry.Keys)
-            {
-                IRanger ranger = pool[key];
-                ranger.OnEvent += (s, e) =>
-                {
-                    switch(e.Type)
-                    {
-                        case Enums.TriggerEventType.Enter:
-                            result = true;
-                            break;
-                        case Enums.TriggerEventType.Exit:
-                            result = false;
-                            break;
-                    }
-                    count++;
-                };
-                ranger.CheckTelemetry(telemetry);
-            }
+            //foreach (var key in telemetry.Keys)
+            //{
+            //    IRanger ranger = pool[key];
+            //    ranger.OnEvent += (s, e) =>
+            //    {
+            //        switch(e.Type)
+            //        {
+            //            case Enums.TriggerEventType.Enter:
+            //                result = true;
+            //                break;
+            //            case Enums.TriggerEventType.Exit:
+            //                result = false;
+            //                break;
+            //        }
+            //        count++;
+            //    };
+            //    ranger.CheckTelemetry(telemetry);
+            //}
 
             Assert.True(result);
         }
@@ -60,28 +60,28 @@ namespace Trigger.Test
         {
             bool result = false;
             int count = 0;
-            IRanger ranger = new DirectRanger(
-                BeaconBody.FromMac("de:a6:78:08:52:a2"), 
-                BeaconBody.FromMac("c9:18:b1:cf:9b:50"), 
-                500, 
-                new DBLogger());
+            //IRanger ranger = new DirectRanger(
+            //    BeaconBody.FromMac("de:a6:78:08:52:a2"), 
+            //    BeaconBody.FromMac("c9:18:b1:cf:9b:50"), 
+            //    500, 
+            //    new DBLogger());
 
-            ranger.OnEvent += (s, e) =>
-            {
-                switch (e.Type)
-                {
-                    case Enums.TriggerEventType.Enter:
-                        result = true;
-                        break;
-                    case Enums.TriggerEventType.Exit:
-                        result = false;
-                        break;
-                }
-                count++;
-            };
-            Telemetry telemetry = DataSource.GetTelemetryFromResource();
+            //ranger.OnEvent += (s, e) =>
+            //{
+            //    switch (e.Type)
+            //    {
+            //        case Enums.TriggerEventType.Enter:
+            //            result = true;
+            //            break;
+            //        case Enums.TriggerEventType.Exit:
+            //            result = false;
+            //            break;
+            //    }
+            //    count++;
+            //};
+            //Telemetry telemetry = DataSource.GetTelemetryFromResource();
 
-            ranger.CheckTelemetry(telemetry);
+            //ranger.CheckTelemetry(telemetry);
 
             Assert.True(result);
         }
