@@ -91,7 +91,7 @@ namespace Trigger.Classes
                             {
                                 foreach (JProperty bi in j.Value.Children<JObject>().Children())
                                 {
-                                    BeaconData beacon = BeaconData.FromMac(bi.Name);
+                                    BeaconData beacon = BeaconData.FromAddress(bi.Name);
 
                                     foreach (JValue s in bi.Value)
                                     {

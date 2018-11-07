@@ -112,6 +112,9 @@ namespace Trigger
         {
             _status = AppearStatus.Unknown;
             _userUid = "";
+            _firstLineInfo.Clear();
+            _secondLineInfo.Clear();
+            _helpLineInfo.Clear();
         }
 
         /// <summary>

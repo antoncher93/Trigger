@@ -8,7 +8,7 @@ namespace Trigger.Classes.Beacons
 {
     public class BeaconData : IList<BeaconItem>
     {
-        public MacAddress Address { get; set; }
+        public string Address { get; set; }
         private readonly IList<BeaconItem> _items;
 
         public BeaconData()
@@ -24,11 +24,11 @@ namespace Trigger.Classes.Beacons
 
         public BeaconItem this[int index] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public static BeaconData FromMac(string mac)
+        public static BeaconData FromAddress(string address)
         {
             return new BeaconData
             {
-                Address = mac
+                Address = address
             };
         }
 
@@ -38,7 +38,9 @@ namespace Trigger.Classes.Beacons
                 return;
 
             foreach (var i in beacon)
+            {
                 Add(i);
+            }
         }
 
         public void CleanBefore(DateTime time)

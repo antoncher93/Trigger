@@ -9,5 +9,7 @@ namespace Trigger.Interfaces
     public interface ISpaceToBeaconMatcher
     {
         string GetSpaceUid(MacAddress beaconMacAddress);
+
+        string GetSpaceUid(Guid guid);
     }
 }

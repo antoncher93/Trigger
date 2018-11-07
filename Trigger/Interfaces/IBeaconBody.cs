@@ -4,6 +4,6 @@ namespace Trigger.Beacons
 {
     public interface IBeaconBody
     {
-        MacAddress Address { get; }
+        string Address { get; }
     }
 }

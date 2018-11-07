@@ -182,7 +182,7 @@ namespace Trigger.Signal
             get
             {
                 Telemetry result = this.Clone();
-                result._items = _items.Where(b => beacons.Select(body => body.Address).Contains(b.Address)).ToList();
+                result._items = _items.Where(b => beacons.Select(body => body.Address.ToLower()).Contains(b.Address.ToLower())).ToList();
 
                 return result;
             }
