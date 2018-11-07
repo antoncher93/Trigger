@@ -6,8 +6,10 @@ using Trigger.Signal;
 
 namespace Trigger.Interfaces
 {
-    public interface IPointToBeaconMatcher
+    public interface ISpaceToBeaconMatcher
     {
-        IEnumerable<string> GetBeacons(Telemetry telemetry);
+        string GetSpaceUid(MacAddress beaconMacAddress);
+
+        string GetSpaceUid(Guid guid);
     }
 }

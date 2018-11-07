@@ -9,7 +9,7 @@ namespace Trigger.Interfaces
 {
     public interface IRangerSettings
     {
-        IEnumerable<IBeaconBody> GetBeacons(string accessPoint, BeaconLine line);
+        IEnumerable<IBeaconBody> GetBeaconsBySpace(string accessPoint, BeaconLine line);
    //     int GetActualPeriod();
       //  ILogger GetLogger();
     }

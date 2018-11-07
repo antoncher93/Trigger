@@ -27,8 +27,8 @@ namespace Trigger
         public RangerBuilder SetCalcSlideAverageCount(int value)
             => Modify(() => { ranger.slideAverageCount = value; });
 
-        public RangerBuilder SetAPointUid(string uid)
-            => Modify(() => { ranger.apoint = new AccessPointData { AccessPointUid = uid }; });
+        public RangerBuilder SetSpaceUid(string uid)
+            => Modify(() => { ranger._spaceUid = uid; });
 
         public RangerBuilder SetActualPeriod(int milliseconds)
             => Modify(() => { ranger._actualSignalPeriod = milliseconds; });

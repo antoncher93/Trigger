@@ -7,6 +7,7 @@ using System.Text;
 using Trigger.Classes;
 using Trigger.Enums;
 using Trigger.Classes.Beacons;
+using Trigger.Beacons;
 
 namespace Trigger.Signal
 {
@@ -39,6 +40,15 @@ namespace Trigger.Signal
             {
                 return _items.FirstOrDefault(x => string.Equals(x.Address, address, StringComparison.InvariantCultureIgnoreCase));
             }
+        }
+
+        public Telemetry Clone()
+        {
+            return new Telemetry
+            {
+                UserId = this.UserId,
+                _items = this._items
+            };
         }
 
         public void Add(BeaconData beacon)
@@ -134,31 +144,29 @@ namespace Trigger.Signal
             {
                 StringBuilder sb = new StringBuilder();
 
-                foreach (var beacon in this)
+                sb.Append("Time$");
+                foreach (var beaconData in _items)
+                    sb.Append($"{beaconData.Address}$");
+
+                sb.AppendLine();
+
+                IEnumerable<DateTime> timeLines = _items.SelectMany(bi => bi.Select(x=>x.Time)).Distinct().OrderBy(x => x); //apointData.Beacons.SelectMany(b => b.Select(bi => bi.Time)).Distinct().OrderBy(x => x);
+                DateTime minTime = timeLines.Min();
+
+                foreach (var time in timeLines)
                 {
-                    sb.AppendLine("Time");
-                    sb.AppendLine();
-                    sb.AppendLine($"Access point {beacon.Address}:{Environment.NewLine}");
+                    sb.Append($"{Math.Round((time - minTime).TotalSeconds, 2)}$");
 
-                    IEnumerable<DateTime> timeLines = beacon.Select(bi => bi.Time).Distinct().OrderBy(x => x); //apointData.Beacons.SelectMany(b => b.Select(bi => bi.Time)).Distinct().OrderBy(x => x);
-                    DateTime minTime = timeLines.Min();
-
-                    foreach (var time in timeLines)
+                    foreach (var beaconData in _items)
                     {
-                        var bItem = beacon.FirstOrDefault(bi => bi.Time == time);
-                        sb.Append($"{Math.Round((time - minTime).TotalSeconds, 2)}\t");
-                        sb.Append($"{(bItem.Rssi != 0 ? bItem.Rssi.ToString() : "")}\t");
-                        //foreach (var beacon in apointData.Beacons)
-                        //{
-                        //    var bItem = beacon.FirstOrDefault(bi => bi.Time == time);
-                        //    sb.Append($"{(bItem.Rssi != 0 ? bItem.Rssi.ToString() : "")}\t");
-                        //}
-
-                        //sb.AppendLine();
+                        var bItem = beaconData.FirstOrDefault(bi => bi.Time == time);
+                        sb.Append($"{(bItem.Rssi != 0 ? bItem.Rssi.ToString() : "")}$");
                     }
 
                     sb.AppendLine();
                 }
+
+                sb.AppendLine();
 
                 return sb.ToString();
             }
@@ -167,5 +175,17 @@ namespace Trigger.Signal
         public int Count => _items.Count;
 
         public bool IsReadOnly => _items.IsReadOnly;
+
+
+        public Telemetry this[IEnumerable<IBeaconBody> beacons]
+        {
+            get
+            {
+                Telemetry result = this.Clone();
+                result._items = _items.Where(b => beacons.Select(body => body.Address.ToLower()).Contains(b.Address.ToLower())).ToList();
+
+                return result;
+            }
+        }
     }
 }
