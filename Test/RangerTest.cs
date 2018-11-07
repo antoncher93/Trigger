@@ -110,7 +110,7 @@ namespace Trigger.Test
                 .AddFirstLineBeacon(BeaconBody.FromMac("DF:20:C6:5A:62:5F"))
                 .AddSecondLineBeacon(BeaconBody.FromMac("DE:A6:78:08:52:A2"))
                 .SetCalcSlideAverageCount(3)
-                .SetAPointUid("B4B1DDB2-6941-40BE-AC8C-29F4E5043A8A")
+                //.SetAPointUid("B4B1DDB2-6941-40BE-AC8C-29F4E5043A8A")
                 .Build();
 
             Assert.True(ranger != null);

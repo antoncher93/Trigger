@@ -33,13 +33,13 @@ namespace Trigger.Test
         }
 
         [Fact]
-        public void TestSeDes()
+        public void TestSeDesUserId()
         {
             bool result = false;
             var user_id = Guid.NewGuid().ToString();
             var telemetry = Telemetry.EmptyForUser(user_id);
 
-            telemetry.Append(BeaconData.FromMac("Aa")
+            telemetry.Append(BeaconData.FromAddress("Aa")
                 .Add(new BeaconItem[]
                 {
                     new BeaconItem{Rssi = -80, Time = DateTime.Now }
@@ -49,11 +49,38 @@ namespace Trigger.Test
 
             var new_telemetry = JsonConvert.DeserializeObject<Telemetry>(s, new TelemetryJsonConverter());
 
-
-
-
-
             Assert.True(telemetry.UserId.Equals(new_telemetry.UserId, StringComparison.CurrentCultureIgnoreCase));
+        }
+
+        [Fact]
+        public void TestSeDesBeacons()
+        {
+            var user_id = Guid.NewGuid().ToString();
+            var telemetry = Telemetry.EmptyForUser(user_id);
+
+            telemetry.Append(BeaconData.FromAddress("Aa")
+                .Add(new BeaconItem[]
+                {
+                    new BeaconItem{Rssi = -80, Time = DateTime.Now }
+                }));
+
+            string s = JsonConvert.SerializeObject(telemetry, new TelemetryJsonConverter());
+
+            var new_telemetry = JsonConvert.DeserializeObject<Telemetry>(s, new TelemetryJsonConverter());
+
+            int count1 = 0, count2 = 0;
+
+            foreach(var b in telemetry)
+            {
+                count1 += b.Count;
+            }
+            foreach (var b in new_telemetry)
+            {
+                count2 += b.Count;
+            }
+
+
+            Assert.True(count1 == count2);
         }
     }
 }
