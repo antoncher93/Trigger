@@ -43,11 +43,11 @@ namespace Trigger.Test
             Stopwatch sw = new Stopwatch();
 
             sw.Start();
-            //Parallel.ForEach(group, (t) =>
-            //{
-            //    foreach (var a in t.Trackers)
-            //        //pool[a.Key].CheckTelemetry(t.Value);
-            //});
+            Parallel.ForEach(group, (t) =>
+            {
+                //foreach (var a in t.Value)
+                //    pool[a.Key].CheckTelemetry(t.Value);
+            });
             sw.Stop();
 
             // Post-validate

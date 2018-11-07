@@ -34,14 +34,16 @@ namespace Trigger.Classes.Signal
             return this;
         }
 
-        public TelemetryGroupBuilder AddObserverRangers(Func<string, IRanger> getObserver)
+        public TelemetryGroupBuilder AddObserverRangers(ISpaceToBeaconMatcher matcher, Func<string, IRanger> getObserver)
         {
             _observers.Clear();
 
-            //_observers =
-            //    _items.SelectMany(t => t.Select(a => a.AccessPointUid)).Distinct()
-            //        .Select(aUid => getObserver(aUid))
-            //        .ToList();
+            _observers =
+                _items.SelectMany(t => t.Select(b => matcher.GetSpaceUid(Guid.Parse(b.Address)))).Distinct() // If beacon address is macAddress than b.Address only
+                    .Select(spaceUid => getObserver(spaceUid))
+                    .ToList();
+
+            _observers.Remove(null);
 
             return this;
         }

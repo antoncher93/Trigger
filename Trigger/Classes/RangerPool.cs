@@ -27,15 +27,18 @@ namespace Trigger.Classes
         {
             get
             {
+                if (key == null)
+                    return null;
+
                 return GetOrAdd(key, (k) =>
                   {
                       RangerBuilder builder = new RangerBuilder()
-                          .SetAPointUid(key);
+                          .SetSpaceUid(key);
                        //   .SetLogger(_rangerSettings.GetLogger());
 
                       Action<BeaconLine, Action<IBeaconBody>> fillLine = (type, action) =>
                       {
-                          IEnumerable<IBeaconBody> beacons = _rangerSettings.GetBeacons(key, type);
+                          IEnumerable<IBeaconBody> beacons = _rangerSettings.GetBeaconsBySpace(key, type);
                           if (beacons != null)
                               foreach (var b in beacons)
                                   action(b);

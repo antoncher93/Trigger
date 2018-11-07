@@ -86,15 +86,19 @@ namespace Trigger.Classes
                             {
                                 offset = new DateTime().AddTicks(j.Value.Value<long>());
                             }
+                            else if (string.Equals(j.Name, "user_id", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                result.UserId = j.Value.Value<string>();
+                            }
                             else if (string.Equals(j.Name, "telemetry", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 foreach (JProperty bi in j.Value.Children<JObject>().Children())
                                 {
-                                    BeaconData beacon = BeaconData.FromMac(bi.Name);
+                                    BeaconData beacon = BeaconData.FromAddress(bi.Name);
 
-                                    foreach (JProperty s in bi.Value.Children<JObject>().Children())
+                                    foreach (JValue s in bi.Value)
                                     {
-                                        BeaconItem item = BeaconItem.FromCompact(bi.Value<long>(), offset);
+                                        BeaconItem item = BeaconItem.FromCompact(s.Value<long>(), offset);
                                         beacon.Add(item);
                                     }
 
