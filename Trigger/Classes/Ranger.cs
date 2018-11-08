@@ -104,9 +104,9 @@ namespace Trigger
 
             _currentTime = beacon.Time;
 
-            if ((_secondLineInfo - BeaconInfoGroup.Max(_firstLineInfo, _helpLineInfo))>=rssiBarier)
+            if ((_secondLineInfo - BeaconInfoGroup.Max(_firstLineInfo, _helpLineInfo)) > rssiBarier)
                 ChangeStatus(AppearStatus.Inside);
-            else if ((_firstLineInfo - _secondLineInfo)>=rssiBarier)
+            else if ((_firstLineInfo - _secondLineInfo) > rssiBarier)
                 ChangeStatus(AppearStatus.Outside);
         }
 
