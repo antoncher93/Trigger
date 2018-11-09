@@ -6,12 +6,12 @@ using Trigger.Beacons;
 
 namespace Trigger.Classes.Beacons
 {
-    public class Beacon : IList<BeaconItem>
+    public class BeaconData : IList<BeaconItem>
     {
-        public string Mac { get; set; }
+        public string Address { get; set; }
         private readonly IList<BeaconItem> _items;
 
-        public Beacon()
+        public BeaconData()
         {
             _items = new List<BeaconItem>();
         }
@@ -24,21 +24,23 @@ namespace Trigger.Classes.Beacons
 
         public BeaconItem this[int index] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public static Beacon FromMac(string mac)
+        public static BeaconData FromAddress(string address)
         {
-            return new Beacon
+            return new BeaconData
             {
-                Mac = mac
+                Address = address
             };
         }
 
-        public void Append(Beacon beacon)
+        public void Append(BeaconData beacon)
         {
-            if (beacon == null || beacon.Mac != Mac)
+            if (beacon == null || beacon.Address != Address)
                 return;
 
             foreach (var i in beacon)
+            {
                 Add(i);
+            }
         }
 
         public void CleanBefore(DateTime time)
@@ -68,7 +70,7 @@ namespace Trigger.Classes.Beacons
                 _items.Add(item);
         }
 
-        public Beacon Add(params BeaconItem[] infoes)
+        public BeaconData Add(params BeaconItem[] infoes)
         {
             foreach (var item in infoes)
             {
@@ -106,6 +108,11 @@ namespace Trigger.Classes.Beacons
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _items.GetEnumerator();
+        }
+
+        public override string ToString()
+        {
+            return $"{Address}: {_items.Count} event(s)";
         }
     }
 }

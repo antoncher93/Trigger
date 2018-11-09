@@ -1,89 +1,120 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Timers;
+using Trigger.Classes;
+using Trigger.Classes.Beacons;
+using Trigger.Classes.Logging;
 
 namespace Trigger.Beacons
 {
-    public class BeaconInfo
+    public class BeaconInfo : ICollection<BeaconItem>
     {
+        private IList<BeaconItem> _signals = new List<BeaconItem>();
         public string MacAddress { get; private set; }
-        public int LastRssi { get; private set; }
-        public double AverageRssi { get; private set; }
-        public double MaxRssi { get; private set; }
-        public double SlideAverageRssi { get; private set; }
-        public DateTime LastRssiTime { get; private set; }
-        public RssiPeak Peak { get; private set; }
+        private ILogger _logger;
+        public TimeSpan ActualPeriod { get; set; }
+        public int TxPower { get; set; } = -40;
 
+        public double AverageRssi
+        {
+            get
+            {
+                if(_signals.Count>0)
+                {
+                    double summ = 0.0;
+                    foreach (var s in _signals)
+                    {
+                        summ += s.Rssi;
+                    }
+                    return summ / (double)_signals.Count;
+                }
 
-        private Timer timer;
+                return double.MinValue;
+            }
+        }
 
-        private int count;
-        private List<int> slideCollect;
-        public int SlideAverageCount { get; set; }
+        public double Distance => Calculator.BeaconDiastance(AverageRssi, TxPower);
 
-        public BeaconInfo(string mac)
+        private string _rssi_to_set = "";
+
+        public int Count => _signals.Count;
+
+        public bool IsReadOnly => _signals.IsReadOnly;
+
+        public BeaconInfo(string mac, int milliseconds)
         {
             MacAddress = mac;
-            LastRssi = -999;
-            AverageRssi = -999;
-            MaxRssi = -999;
-            SlideAverageRssi = -999;
-            count = 0;
-
-            slideCollect = new List<int>();
+            ActualPeriod = TimeSpan.FromMilliseconds(milliseconds);
         }
 
-        public void ResetSlideAverageRssi()
+        public BeaconInfo(string mac, int milliseconds, ILogger logger)
         {
-            SlideAverageRssi = -200;
-            slideCollect.Clear();
+            MacAddress = mac;
+            ActualPeriod = TimeSpan.FromMilliseconds(milliseconds);
+            _logger = logger;
         }
 
-        public void SetLastRssi(BeaconItem info)
+        public void Add(BeaconItem item)
         {
-            count++;
-           
-            LastRssi = info.Rssi;
-            LastRssiTime = info.Time;
+            _rssi_to_set = item.Rssi.ToString();
 
-            if (LastRssi > MaxRssi) MaxRssi = LastRssi;
+            _signals.Add(item);
+            Update(item.Time);
+        }
 
-            AverageRssi = ((AverageRssi * (count - 1)) + LastRssi) / count;
-
-            if (slideCollect.Count >= SlideAverageCount)
+        public void Update(DateTime actualTime)
+        {
+            for (int i = 0; i < _signals.Count; i++)
             {
-                slideCollect.RemoveAt(0);
-            }
-
-            slideCollect.Add(LastRssi);
-            SlideAverageRssi = CalcSlideAverageRssi();
-
-            if (slideCollect.Count > 1 && SlideAverageRssi < slideCollect[slideCollect.Count - 1])
-            {
-                if (Peak == null || Peak.Rssi < SlideAverageRssi)
+                if (actualTime - _signals[i].Time > ActualPeriod)
                 {
-                    Peak = new RssiPeak { Rssi = SlideAverageRssi, Time = LastRssiTime };
+                    _signals.RemoveAt(i);
+                    i--;
                 }
             }
-           
+
+            _logger?.Log(new string[] {actualTime.TimeOfDay.ToString(), MacAddress, _rssi_to_set,  AverageRssi.ToString(), Distance.ToString()});
+            _rssi_to_set = "";
         }
 
-        private double CalcSlideAverageRssi()
+        #region ICollection
+
+        public void Clear()
         {
-            double sum = 0;
-            foreach (var r in slideCollect)
-            {
-                sum += r;
-            }
-
-            return sum / slideCollect.Count;
+            _signals.Clear();
         }
 
-        public class RssiPeak
+        public bool Contains(BeaconItem item)
         {
-            public double Rssi { get; set; }
-            public DateTime Time { get; set; }
+            return _signals.Contains(item);
         }
+
+        public void CopyTo(BeaconItem[] array, int arrayIndex)
+        {
+            _signals.CopyTo(array, arrayIndex);
+        }
+
+        public bool Remove(BeaconItem item)
+        {
+            return _signals.Remove(item);
+        }
+
+        public IEnumerator<BeaconItem> GetEnumerator()
+        {
+            return _signals.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _signals.GetEnumerator();
+        }
+
+#endregion
+
+
     }
+
+
 }

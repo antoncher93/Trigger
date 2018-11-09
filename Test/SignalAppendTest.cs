@@ -21,14 +21,14 @@ namespace Trigger.Test
             Telemetry telemetry = Telemetry.EmptyForUser("custom");
             string mac = "115533";
             int rssi = -79;
-            string apointUid = "apoint";
+            
             DateTime time = DateTime.Now;
 
-            telemetry.NewBeacon(mac, rssi, apointUid, time);
+            //telemetry.NewBeacon(mac, rssi, time);
 
             // Validate
 
-            Assert.True(telemetry[apointUid].Beacons.Count == 1);
+            Assert.True(telemetry[mac].Count == 1);
 
         }
     }

@@ -3,14 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Trigger.Classes.Logging;
+using Trigger.Classes;
 
 namespace Trigger.Beacons
 {
     public class BeaconInfoGroup : ICollection<BeaconInfo>
     {
-        #region//from ICollection
+        #region From ICollection
 
-        private IList<BeaconInfo> beacons;
+        private IList<BeaconInfo> beacons = new List<BeaconInfo>();
 
         public int Count => beacons.Count;
 
@@ -18,7 +20,6 @@ namespace Trigger.Beacons
 
         public void Add(BeaconInfo item)
         {
-            item.SlideAverageCount = this.SlideAverageCount;
             beacons.Add(item);
         }
 
@@ -34,7 +35,7 @@ namespace Trigger.Beacons
 
         public void CopyTo(BeaconInfo[] array, int arrayIndex)
         {
-
+            beacons.CopyTo(array, arrayIndex);
         }
 
         public IEnumerator<BeaconInfo> GetEnumerator()
@@ -54,52 +55,52 @@ namespace Trigger.Beacons
 
         #endregion
 
-        public int SlideAverageCount
+        private ILogger _logger;
+        public int ActualPeriod { get; set; } = 1000;
+
+        public BeaconInfoGroup(ILogger logger = null)
         {
-            get; set;
-        }
-        public BeaconInfoGroup()
-        {
-            beacons = new List<BeaconInfo>();
-            SlideAverageCount = 3;
+            _logger = logger;
         }
 
-        private TimeSpan _timeOffset = new TimeSpan(0, 0, 2);
         //public bool Changed { get; private set; } = false;
         /// <summary>
         /// 
         /// </summary>
         /// <param name="macAddress">Beacon mac</param>
         /// <param name="beacon"></param>
-        public void SetRssiValue(string macAddress, BeaconItem beacon)
+        public void SetRssiValue(MacAddress macAddress, BeaconItem beacon)
         {
-            var foundbeacon = beacons.FirstOrDefault(b => string.Equals(b.MacAddress, macAddress, StringComparison.CurrentCultureIgnoreCase));
+            var foundbeacon = beacons.FirstOrDefault(b => b.MacAddress == macAddress);
+
             if (foundbeacon == null)
             {
-                foundbeacon = new BeaconInfo(macAddress);
+                foundbeacon = new BeaconInfo(macAddress, ActualPeriod);
                 this.Add(foundbeacon);
             }
 
-            foundbeacon.SetLastRssi(beacon);
+            foundbeacon.Add(beacon);
         }
 
-        public double MaxSlideRssi
+        public double ValueToCompare => MaxAverRssi;
+
+        public double MaxAverRssi
         {
             get
             {
                 if (beacons.Count > 0)
                 {
-                    return beacons.OrderByDescending(b => b.SlideAverageRssi).FirstOrDefault().SlideAverageRssi;
+                    return beacons.OrderByDescending(b => b.AverageRssi).FirstOrDefault().AverageRssi;
                 }
                 else return -200;
             }
         }
 
-        public double MaxLastRssi
+        public void Update(DateTime actual_time)
         {
-            get
+            foreach (var beacon in beacons)
             {
-                return beacons.OrderByDescending(b => b.LastRssi).FirstOrDefault().LastRssi;
+                beacon.Update(actual_time);
             }
         }
 
@@ -110,7 +111,7 @@ namespace Trigger.Beacons
             {
                 throw new NullReferenceException();
             }
-            return a.MaxSlideRssi - b.MaxSlideRssi;
+            return a.ValueToCompare - b.ValueToCompare;
         }
 
         public static bool operator <(BeaconInfoGroup a, BeaconInfoGroup b)
@@ -124,7 +125,7 @@ namespace Trigger.Beacons
             if (a != null && b == null)
                 return false;
 
-            return a.MaxSlideRssi < b.MaxSlideRssi;
+            return a.ValueToCompare < b.ValueToCompare;
         }
 
         public static bool operator >(BeaconInfoGroup a, BeaconInfoGroup b)
@@ -138,8 +139,10 @@ namespace Trigger.Beacons
             if (a != null && b == null)
                 return true;
 
-            return a.MaxSlideRssi > b.MaxSlideRssi;
+            return a.ValueToCompare > b.ValueToCompare;
         }
+
+      
 
         public static bool operator <=(BeaconInfoGroup a, BeaconInfoGroup b)
         {
@@ -152,7 +155,7 @@ namespace Trigger.Beacons
             if (a != null && b == null)
                 return false;
 
-            return a.MaxSlideRssi <= b.MaxSlideRssi;
+            return a.ValueToCompare <= b.ValueToCompare;
         }
 
         public static bool operator >=(BeaconInfoGroup a, BeaconInfoGroup b)
@@ -166,7 +169,7 @@ namespace Trigger.Beacons
             if (a != null && b == null)
                 return true;
 
-            return a.MaxSlideRssi >= b.MaxSlideRssi;
+            return a.ValueToCompare >= b.ValueToCompare;
         }
 
         public static BeaconInfoGroup Max(params BeaconInfoGroup[] items)
@@ -183,16 +186,7 @@ namespace Trigger.Beacons
             return max;
         }
 
-        public void UpdateSlideAverageRssi(DateTime actual_time)
-        {
-            foreach(var beacon in beacons)
-            {
-                if(actual_time - beacon.LastRssiTime > new TimeSpan?(_timeOffset) )
-                {
-                    beacon.ResetSlideAverageRssi();
-                }
-            }
-        }
+        
         #endregion
     }
 }

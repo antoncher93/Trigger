@@ -1,6 +1,7 @@
 ﻿using System;
 using Trigger.Beacons;
 using Trigger.Classes;
+using Trigger.Classes.Logging;
 
 namespace Trigger
 {
@@ -26,8 +27,14 @@ namespace Trigger
         public RangerBuilder SetCalcSlideAverageCount(int value)
             => Modify(() => { ranger.slideAverageCount = value; });
 
-        public RangerBuilder SetAPointUid(string uid)
-            => Modify(() => { ranger.apoint = new AccessPoint { Uid = uid }; });
+        public RangerBuilder SetSpaceUid(string uid)
+            => Modify(() => { ranger._spaceUid = uid; });
+
+        public RangerBuilder SetActualPeriod(int milliseconds)
+            => Modify(() => { ranger._actualSignalPeriod = milliseconds; });
+
+        public RangerBuilder SetLogger(ILogger logger)
+            => Modify(() => { ranger._logger = logger; });
 
         public Ranger Build()
         {           

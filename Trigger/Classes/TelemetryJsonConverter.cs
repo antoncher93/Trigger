@@ -29,32 +29,27 @@ namespace Trigger.Classes
             writer.WritePropertyName("timeoffset");
             writer.WriteValue(offset.Ticks);
 
+            writer.WritePropertyName("user_id");
+            writer.WriteValue(tel.UserId);
+
             writer.WritePropertyName("telemetry");
             writer.WriteStartArray();
 
-            foreach (var a in tel)
+            foreach (var beac in tel)
             {
                 writer.WriteStartObject();
-                writer.WritePropertyName(a.Key); // Access point
+                writer.WritePropertyName(beac.Address); // Beacon
 
                 writer.WriteStartArray();
-                foreach (var b in a.Value.Beacons)
+                foreach (var s in beac)
                 {
-                    writer.WriteStartObject();
-                    writer.WritePropertyName(b.Mac); // Beacon mac address
 
-                    writer.WriteStartArray();
-                    foreach (var bi in b)
-                    {
-                        writer.WriteValue(bi.ToCompact(offset));
-                        //writer.WriteStartObject();
-                        //writer.WritePropertyName(bi.Time.ToString());
-                        //writer.WriteValue(Math.Abs(bi.Rssi));
-                        //writer.WriteEndObject();
-                    }
-                    writer.WriteEndArray();
+                    writer.WriteValue(s.ToCompact(offset));
+                    //writer.WriteStartObject();
+                    //writer.WritePropertyName(bi.Time.ToString());
+                    //writer.WriteValue(Math.Abs(bi.Rssi));
+                    //writer.WriteEndObject();
 
-                    writer.WriteEndObject();
                 }
                 writer.WriteEndArray();
 
@@ -88,26 +83,23 @@ namespace Trigger.Classes
                             {
                                 offset = new DateTime().AddTicks(j.Value.Value<long>());
                             }
+                            else if (string.Equals(j.Name, "user_id", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                result.UserId = j.Value.Value<string>();
+                            }
                             else if (string.Equals(j.Name, "telemetry", StringComparison.InvariantCultureIgnoreCase))
                             {
-                                foreach (JProperty ap in j.Value.Children<JObject>().Children())
+                                foreach (JProperty bi in j.Value.Children<JObject>().Children())
                                 {
-                                    AccessPoint point = new AccessPoint { Uid = ap.Name };
+                                    BeaconData beacon = BeaconData.FromAddress(bi.Name);
 
-                                    foreach (JProperty b in ap.Value.Children<JObject>().Children())
+                                    foreach (JValue s in bi.Value)
                                     {
-                                        Beacon beacon = new Beacon { Mac = b.Name };
-
-                                        foreach (JToken bi in b.Value.Children<JToken>())
-                                        {
-                                            BeaconItem item = BeaconItem.FromCompact(bi.Value<long>(), offset);
-                                            beacon.Add(item);
-                                        }
-
-                                        point.Beacons.Add(beacon);
+                                        BeaconItem item = BeaconItem.FromCompact(s.Value<long>(), offset);
+                                        beacon.Add(item);
                                     }
 
-                                    result.Add(point);
+                                    result.Add(beacon);
                                 }
                             }
                         }
