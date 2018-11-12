@@ -10,22 +10,23 @@ namespace Trigger.Signal
     {
         private const int MIN_STABLE_TIME_SEC = 10;
 
-        ///// <summary>
-        ///// Cut noise beacons from package
-        ///// </summary>
-        ///// <param name="telemetry"></param>
-        ///// <param name="matcher"></param>
-        ///// <returns></returns>
-        //public static IEnumerable<Telemetry> CutNoise(this IEnumerable<Telemetry> telemetry, IPointToBeaconMatcher matcher)
-        //{
-        //    foreach(var t in telemetry)
-        //    {
-        //        IEnumerable<MacAddress> beacons = matcher.GetBeacons(t).Select(x => (MacAddress)x);
-        //        //ap.Beacons = ap.Beacons.Where(b => beacons.Contains(b.Address)).ToList();
+        /// <summary>
+        /// Cut noise beacons from package
+        /// </summary>
+        /// <param name="telemetry"></param>
+        /// <returns></returns>
+        public static IEnumerable<Telemetry> CutNoise(this IEnumerable<Telemetry> telemetry)
+        {
+            Guid g = new Guid();
+            foreach (var t in telemetry)
+            {
+                var notGuid = t.Where(x => !Guid.TryParse(x.Address, out g)).ToList();
+                foreach (var e in notGuid)
+                    t.Remove(e);
 
-        //        yield return t;
-        //    }
-        //}
+                yield return t;
+            }
+        }
 
 
         /// <summary>
