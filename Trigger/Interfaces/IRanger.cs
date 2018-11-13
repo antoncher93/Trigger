@@ -1,11 +1,14 @@
-﻿using Trigger.Signal;
+﻿using System;
+using Trigger.Signal;
 
 namespace Trigger.Interfaces
 {
-    public interface IRanger : ITriggerEvents
+    public interface IRanger : ITriggerEvents, IObserver<Telemetry>
     {
-        void CheckTelemetry(Telemetry telemetry);
+        //void ProduceEvent(Telemetry telemetry);
 
         bool IsObsolete();
+
+        void Subscribe(IObservable<Telemetry> provider);
     }
 }

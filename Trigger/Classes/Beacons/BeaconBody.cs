@@ -1,18 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Trigger.Classes;
 
 namespace Trigger.Beacons
 {
     public class BeaconBody : IBeaconBody
     {
-        public string Mac { get; set; }
+        public string Address { get; protected set; }
 
-        private BeaconBody() { }
-
-        public static BeaconBody FromMac(string mac)
+        public static BeaconBody FromMac(MacAddress address)
         {
-            return new BeaconBody { Mac = mac };
+            return new BeaconBody { Address = address };
+        }
+
+        public static BeaconBody FromUUID(Guid uuid)
+        {
+            return new BeaconBody { Address = uuid.ToString().Trim() };
+        }
+
+        public override string ToString()
+        {
+            return Address;
         }
     }
 }

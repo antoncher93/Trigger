@@ -1,7 +1,9 @@
-﻿namespace Trigger.Beacons
+﻿using Trigger.Classes;
+
+namespace Trigger.Beacons
 {
     public interface IBeaconBody
     {
-        string Mac { get; set; }
+        string Address { get; }
     }
 }

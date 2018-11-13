@@ -33,6 +33,11 @@ namespace Trigger.Test
         {
             return null;
         }
+
+        public IEnumerable<IBeaconBody> GetBeaconsBySpace(string accessPoint, BeaconLine line)
+        {
+            return new BeaconBody[] { };
+        }
     }
 
     public class Dummy2RangerSettings : IRangerSettings
@@ -60,6 +65,11 @@ namespace Trigger.Test
         public ILogger GetLogger()
         {
             return new DBLogger();
+        }
+
+        public IEnumerable<IBeaconBody> GetBeaconsBySpace(string accessPoint, BeaconLine line)
+        {
+            return new BeaconBody[] { };
         }
     }
 }

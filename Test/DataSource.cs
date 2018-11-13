@@ -11,145 +11,85 @@ namespace Trigger.Test
 {
     public class DataSource
     {
+
         public static IEnumerable<object[]> GetTelemerty_10x6()
         {
             Random rand = new Random(1);
 
             Func<TelemetryGroup> a = () =>
             {
-                TelemetryGroup group = new TelemetryGroup();
+                IList<Telemetry> items = new List<Telemetry>();
+
                 for (int i = 0; i < 1000000; i++)
-                    group.Add(new Telemetry()
-                    {
-                        Type = Enums.TelemetryType.FromUser,
-                        UserId = NewGuid()
-                    }.AddRange(new[]
-                                 {
-                                 new Beacon
-                                          {
-                                               Mac = "c9:18:b1:cf:9b:50",
-                                          }.Add(
-                                              new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    }),
-                                          new Beacon
-                                          {
-                                               Mac = "e3:25:3e:0a:7e:4c",
+                {
+                    var telemetry = Telemetry.EmptyForUser(NewGuid())
+                    .Append(
+                        new BeaconData
+                        {
+                            Address = "c9:18:b1:cf:9b:50"
+                        }.Add(
+                            new BeaconItem
+                            {
+                                Rssi = -rand.Next(20, 140),
+                                Time = RandDateTime(rand)
+                            },
+                            new BeaconItem
+                            {
+                                Rssi = -rand.Next(20, 140),
+                                Time = RandDateTime(rand)
+                            },
+                            new BeaconItem
+                            {
+                                Rssi = -rand.Next(20, 140),
+                                Time = RandDateTime(rand)
+                            },
+                            new BeaconItem
+                            {
+                                Rssi = -rand.Next(20, 140),
+                                Time = RandDateTime(rand)
+                            },
+                            new BeaconItem
+                            {
+                                Rssi = -rand.Next(20, 140),
+                                Time = RandDateTime(rand)
+                            }
+                            )
+                         )
+                         .Append(
+                        new BeaconData
+                        {
+                            Address = "de:a6:78:08:52:a2",
+                        }.Add(
+                            new BeaconItem
+                            {
+                                Rssi = -rand.Next(20, 140),
+                                Time = RandDateTime(rand)
+                            },
+                            new BeaconItem
+                            {
+                                Rssi = -rand.Next(20, 140),
+                                Time = RandDateTime(rand)
+                            },
+                            new BeaconItem
+                            {
+                                Rssi = -rand.Next(20, 140),
+                                Time = RandDateTime(rand)
+                            },
+                            new BeaconItem
+                            {
+                                Rssi = -rand.Next(20, 140),
+                                Time = RandDateTime(rand)
+                            },
+                            new BeaconItem
+                            {
+                                Rssi = -rand.Next(20, 140),
+                                Time = RandDateTime(rand)
+                            }));
 
-                                          }.Add(
-                                              new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    }),
-                                          new Beacon
-                                          {
-                                               Mac = "de:a6:78:08:52:a2",
-                                          }.Add(
-                                              new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    }),
-                                          new Beacon
-                                          {
-                                               Mac = "c1:11:11:1b:11:1a"
+                    items.Add(telemetry);
+                }
 
-                                          }.Add(
-                                              new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    }),
-                                          new Beacon
-                                          {
-                                               Mac = "fd:3a:73:b7:54:ba"
-
-                                          }
-                                          .Add(
-                                              new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    },
-                                                    new BeaconItem {
-                                                        Rssi = - rand.Next(20, 140),
-                                                        Time = RandDateTime(rand)
-                                                    })
-                        }));
+                TelemetryGroup group = new TelemetryGroup(items);
 
                 return group;
             };
@@ -180,5 +120,9 @@ namespace Trigger.Test
             return telemetry;
         }
 
+
+        
     }
+
+
 }
