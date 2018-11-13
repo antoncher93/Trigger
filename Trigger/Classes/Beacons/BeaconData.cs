@@ -22,7 +22,7 @@ namespace Trigger.Classes.Beacons
 
         public bool IsReadOnly => throw new NotImplementedException();
 
-        public BeaconItem this[int index] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public BeaconItem this[int index] { get => _items[index]; set => _items[index] = value; }
 
         public static BeaconData FromAddress(string address)
         {
@@ -41,12 +41,6 @@ namespace Trigger.Classes.Beacons
             {
                 Add(i);
             }
-        }
-
-        public void CleanBefore(DateTime time)
-        {
-            foreach (var item in this.Where(i => i.Time < time))
-                Remove(item);
         }
 
         public int IndexOf(BeaconItem item)

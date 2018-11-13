@@ -12,6 +12,8 @@ namespace Trigger
 {
     public class Ranger : IRanger
     {
+        
+
         private IDisposable unsubscriber;
 
         #region Variables
@@ -24,6 +26,7 @@ namespace Trigger
         private string _userUid { get; set; }
         internal string _spaceUid;
         internal int _actualSignalPeriod = 1000;
+        internal int _eventHoldPeriodMillisec = 3000;
 
         private BeaconInfoGroup _firstLineInfo = new BeaconInfoGroup();
         private BeaconInfoGroup _secondLineInfo = new BeaconInfoGroup();
@@ -78,7 +81,9 @@ namespace Trigger
 
             foreach (DateTime date in checkPoints)
             {
-                foreach (var beaconSignal in data.Where(beaconSignal => beaconSignal.Item.Time == date))
+                foreach (var beaconSignal in data.Where(beaconSignal => beaconSignal.Item.Time == date 
+                //&& beaconSignal.Item.Rssi>-80
+                ))
                     RefreshBeaconInfoGroup(beaconSignal.mac, beaconSignal.Item);
 
                 CheckActualRssi(date);
