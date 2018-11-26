@@ -16,6 +16,8 @@ namespace Trigger.Beacons
         private ILogger _logger;
         public TimeSpan ActualPeriod { get; set; }
         public int TxPower { get; set; } = -40;
+        public double BaseX { get; set; } = 0;
+        public double BaseY { get; set; } = 0;
 
         public double AverageRssi
         {

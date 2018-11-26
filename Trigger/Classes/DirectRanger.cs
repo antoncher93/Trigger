@@ -17,6 +17,8 @@ namespace Trigger.Classes
         internal double _baseDistance = 3.0;
         internal ILogger _logger;
 
+        private double BaseDistance { get => Math.Abs(_beaconA.Distance-_beaconB.Distance); }
+
         private AppearStatus _status = AppearStatus.Unknown;
         private DateTime currentTime;
 
@@ -67,6 +69,32 @@ namespace Trigger.Classes
             else if(_beaconA.Distance > _beaconB.Distance)
             {
                 ChangeStatus(AppearStatus.Inside);
+            }
+        }
+
+        private double PositionX
+        {
+            get
+            {
+                double result = 0;
+
+                double p = 0.5*(_beaconA.Distance + _beaconB.Distance + BaseDistance);
+                double s = Math.Sqrt(p * (p - _beaconA.Distance) * (p - _beaconB.Distance) * (p - (BaseDistance)));
+                double y = 2 * s / BaseDistance;
+
+                double _Xa = Math.Sqrt(Math.Pow(_beaconA.Distance, 2) - Math.Pow(y, 2));
+                double _Xb = Math.Sqrt(Math.Pow(_beaconB.Distance, 2) - Math.Pow(y, 2));
+
+                if(_Xb > BaseDistance)
+                {
+                    result = _beaconA.BaseX - _Xa;
+                }
+                else
+                {
+                    result = _beaconA.BaseX + _Xa;
+                }
+
+                return result;
             }
         }
 
