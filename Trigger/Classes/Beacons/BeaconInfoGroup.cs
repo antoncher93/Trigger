@@ -84,6 +84,18 @@ namespace Trigger.Beacons
 
         public double ValueToCompare => MaxAverRssi;
 
+        public BeaconItem RssiPeak
+        {
+            get
+            {
+                if (beacons.Count > 0)
+                {
+                    return beacons.OrderByDescending(b => b.MaxSignal.Rssi).FirstOrDefault().MaxSignal;
+                }
+                else return BeaconItem.Default;
+            }
+        }
+
         public double MaxAverRssi
         {
             get

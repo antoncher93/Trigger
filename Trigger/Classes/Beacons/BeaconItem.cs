@@ -46,5 +46,10 @@ namespace Trigger.Beacons
         {
             return $"{Rssi} {Time.ToString("hh:mm:ss.fff")}";
         }
+
+        public static TimeSpan operator -(BeaconItem a, BeaconItem b)
+        {
+            return a.Time - b.Time;
+        }
     }
 }
