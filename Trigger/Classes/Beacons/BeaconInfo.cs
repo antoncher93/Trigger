@@ -18,7 +18,7 @@ namespace Trigger.Beacons
         public int TxPower { get; set; } = -40;
         public double BaseX { get; set; } = 0;
         public double BaseY { get; set; } = 0;
-        public BeaconItem MaxSignal { get; private set; } = BeaconItem.Default;
+        public BeaconItem MaxSignal { get; set; } = BeaconItem.Default;
 
         public double AverageRssi
         {
@@ -64,7 +64,6 @@ namespace Trigger.Beacons
             _rssi_to_set = item.Rssi.ToString();
 
             _signals.Add(item);
-            Update(item.Time);
 
             var f = MaxSignal.Equals(BeaconItem.Default);
 

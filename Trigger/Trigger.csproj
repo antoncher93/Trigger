@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Trigger</AssemblyName>
     <RootNamespace>Trigger</RootNamespace>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <AssemblyVersion>1.0.0.3</AssemblyVersion>
     <FileVersion>1.0.0.2</FileVersion>
     <PackageId>Clipcoin.Trigger</PackageId>
