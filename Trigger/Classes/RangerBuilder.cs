@@ -2,43 +2,30 @@
 using Trigger.Beacons;
 using Trigger.Classes;
 using Trigger.Classes.Logging;
+using Trigger.Interfaces;
+using Trigger.Rangers;
 
 namespace Trigger
 {
-    public class RangerBuilder
+    public class RangerBuilder : TwoLineRangerBuilder
     {
-        private Ranger ranger = new Ranger();
-
-        private RangerBuilder Modify(Action act)
+        public RangerBuilder() : base()
         {
-            act?.Invoke();
-            return this;
+            ranger = new Ranger();
         }
 
-        public RangerBuilder AddFirstLineBeacon(IBeaconBody beacon)
-            => Modify(() => { ranger._firstLineBeacons.Add(beacon); });
-
-        public RangerBuilder AddSecondLineBeacon(IBeaconBody beacon)
-            => Modify(() => { ranger._secondLineBeacons.Add(beacon); });
-
-        public RangerBuilder AddHelpBeacon(IBeaconBody beacon)
-            => Modify(() => { ranger._helpBeacons.Add(beacon); });
+        public new RangerBuilder Modify(Action act)
+        {
+            return (RangerBuilder)base.Modify(act);
+        }
 
         public RangerBuilder SetCalcSlideAverageCount(int value)
-            => Modify(() => { ranger.slideAverageCount = value; });
-
-        public RangerBuilder SetSpaceUid(string uid)
-            => Modify(() => { ranger._spaceUid = uid; });
+            => Modify(() => { (ranger as Ranger).slideAverageCount = value; });
 
         public RangerBuilder SetActualPeriod(int milliseconds)
-            => Modify(() => { ranger._actualSignalPeriod = milliseconds; });
+            => Modify(() => { (ranger as Ranger)._actualSignalPeriod = milliseconds; });
 
         public RangerBuilder SetLogger(ILogger logger)
-            => Modify(() => { ranger._logger = logger; });
-
-        public Ranger Build()
-        {           
-            return ranger;
-        }
+            => Modify(() => { (ranger as Ranger)._logger = logger; });
     }
 }

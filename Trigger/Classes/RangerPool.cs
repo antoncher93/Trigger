@@ -13,7 +13,7 @@ namespace Trigger.Classes
     /// Dictionary key is access point uid
     /// </summary>
     public class RangerPool :
-        ConcurrentDictionary<string, Ranger>
+        ConcurrentDictionary<string, IRanger>
         , IRangerPool
     {
         private readonly IRangerSettings _rangerSettings = null;
@@ -32,10 +32,9 @@ namespace Trigger.Classes
 
                 return GetOrAdd(key, (k) =>
                   {
-                      RangerBuilder builder = new RangerBuilder()
-                          .SetSpaceUid(key);
-                       //   .SetLogger(_rangerSettings.GetLogger());
-
+                      RangerBuilder builder = new RangerBuilder();
+                      //   .SetLogger(_rangerSettings.GetLogger());
+                      builder.SetSpaceUid(key);
                       Action<BeaconLine, Action<IBeaconBody>> fillLine = (type, action) =>
                       {
                           IEnumerable<IBeaconBody> beacons = _rangerSettings.GetBeaconsBySpace(key, type);
@@ -48,7 +47,7 @@ namespace Trigger.Classes
                       fillLine(BeaconLine.Second, (b) => { builder.AddSecondLineBeacon(b); });
                       fillLine(BeaconLine.Help, (b) => { builder.AddHelpBeacon(b); });
 
-                      Ranger result = builder.Build();
+                      IRanger result = builder.Build();
 
                       result.OnEvent += OnEvent;
 
@@ -61,7 +60,7 @@ namespace Trigger.Classes
 
         public void Flush()
         {
-            Ranger removed;
+            IRanger removed;
             foreach (var r in this)
                 if (r.Value.IsObsolete())
                     TryRemove(r.Key, out removed);

@@ -6,57 +6,47 @@ using Trigger.Classes;
 using Trigger.Classes.Logging;
 using Trigger.Enums;
 using Trigger.Interfaces;
+using Trigger.Rangers;
 using Trigger.Signal;
 
 namespace Trigger
 {
-    public class Ranger : IRanger
+    public class Ranger : TwoLineRanger
     {
-       
-
         private IDisposable unsubscriber;
 
         #region Variables
         internal int slideAverageCount = 5;
         internal int rssiBarier = 0;
 
-        internal List<IBeaconBody> _firstLineBeacons { get; private set; } = new List<IBeaconBody>();
-        internal List<IBeaconBody> _secondLineBeacons { get; private set; } = new List<IBeaconBody>();
-        internal List<IBeaconBody> _helpBeacons { get; private set; } = new List<IBeaconBody>();
-        private string _userUid { get; set; }
-        internal string _spaceUid;
-        internal int _actualSignalPeriod = 1000;
-
-        private BeaconInfoGroup _firstLineInfo = new BeaconInfoGroup();
-        private BeaconInfoGroup _secondLineInfo = new BeaconInfoGroup();
-        private BeaconInfoGroup _helpLineInfo = new BeaconInfoGroup();
-
         private AppearStatus _status = AppearStatus.Unknown;
-        private DateTime _currentTime;
-        internal ILogger _logger;
+
+        internal TimeSpan StatusHolderPeriod { get; set; } = TimeSpan.FromSeconds(3);
+
+        private StatusHolder _statusHolder { get; set; } = StatusHolder.Empty;
 
         #endregion
 
-        internal void ChangeStatus(AppearStatus value)
+        internal void ChangeStatus(AppearStatus value, DateTime time)
         {
             if (
                 _status != AppearStatus.Unknown &&
                 _status != value
                 )
             {
-                OnEvent?.Invoke(this, new TriggerEventArgs
-                {
-                    SpaceUid = _spaceUid,
-                    Timespan = _currentTime,
-                    UserId = _userUid,
-                    Type = (value == AppearStatus.Inside ? TriggerEventType.Enter : TriggerEventType.Exit)
-                });
+                RaiseEvent(value == AppearStatus.Inside ? TriggerEventType.Enter : TriggerEventType.Exit, time);
+
+                //OnEvent?.Invoke(this, new TriggerEventArgs
+                //{
+                //    SpaceUid = _spaceUid,
+                //    Timespan = time,
+                //    UserId = _userUid,
+                //    Type = (value == AppearStatus.Inside ? TriggerEventType.Enter : TriggerEventType.Exit)
+                //});
 
             }
             _status = value;
         }
-
-        public event EventHandler<TriggerEventArgs> OnEvent;
 
         #region Methods
         private void ProduceEvent(Telemetry telemetry)
@@ -83,7 +73,11 @@ namespace Trigger
                 foreach (var beaconSignal in data.Where(beaconSignal => beaconSignal.Item.Time == date))
                     RefreshBeaconInfoGroup(beaconSignal.mac, beaconSignal.Item);
 
+                //UpdateStatusHolder(date);
+
                 CheckActualRssi(date);
+
+                //UpdateStatusHolder(date);
             }
             // ----------------
 
@@ -109,10 +103,20 @@ namespace Trigger
             Flush();
         }
 
+        private void UpdateStatusHolder(DateTime time)
+        {
+            if(!_statusHolder.Equals(StatusHolder.Empty) &&
+                time -_statusHolder.Time >= StatusHolderPeriod)
+            {
+                ChangeStatus(_statusHolder.Status, _statusHolder.Time);
+            }
+        }
 
-        private void Flush()
+
+        protected override void Flush()
         {
             _status = AppearStatus.Unknown;
+            _statusHolder = StatusHolder.Empty;
             _userUid = "";
             _firstLineInfo.Clear();
             _secondLineInfo.Clear();
@@ -127,100 +131,59 @@ namespace Trigger
         {
             Update(beacon.Time);
 
-            _currentTime = beacon.Time;
 
             if ((_secondLineInfo - BeaconInfoGroup.Max(_firstLineInfo, _helpLineInfo)) > rssiBarier)
-                ChangeStatus(AppearStatus.Inside);
+                ChangeStatus(AppearStatus.Inside, beacon.Time);
             else if ((_firstLineInfo - _secondLineInfo) > rssiBarier)
-                ChangeStatus(AppearStatus.Outside);
+                ChangeStatus(AppearStatus.Outside, beacon.Time);
         }
 
         private void CheckActualRssi(DateTime actualTime)
         {
             Update(actualTime);
 
-            _currentTime = actualTime;
 
             if (_secondLineInfo > _firstLineInfo)
             {
-                ChangeStatus(AppearStatus.Inside);
+                ChangeStatus(AppearStatus.Inside, actualTime);
+
+                //RequestStatusChanger(new StatusHolder { Status = AppearStatus.Inside, Time = actualTime });
             }
             else if (_firstLineInfo > _secondLineInfo)
             {
-                ChangeStatus(AppearStatus.Outside);
+                ChangeStatus(AppearStatus.Outside, actualTime);
+
+                //RequestStatusChanger(new StatusHolder { Status = AppearStatus.Outside, Time = actualTime });
             }
         }
 
-        private void RefreshBeaconInfoGroup(MacAddress macAddress, BeaconItem beacon)
-        {
-            bool flag = false;
+        
 
-            Action<IList<IBeaconBody>, BeaconInfoGroup> CheckBeacon = (line, group) =>
+        private void RequestStatusChanger(StatusHolder holder)
+        {
+            if (!_statusHolder.Equals(StatusHolder.Empty)) ///Have no status changes
             {
-                if (flag)
-                    return;
-
-                if (line.Any(b => b.Address == macAddress))
+                if (holder.Status != _statusHolder.Status)
                 {
-                    flag = true;
-
-                    var res = group.FirstOrDefault(b => b.MacAddress == macAddress);
-                    if (res == null)
-                    {
-                        res = _logger == null ?
-                        new BeaconInfo(macAddress, _actualSignalPeriod)
-                        : new BeaconInfo(macAddress, _actualSignalPeriod, _logger);
-
-                        group.Add(res);
-                    }
-                    res.Add(beacon);
-                    return;
+                    _statusHolder = StatusHolder.Empty;
                 }
-            };
 
-            CheckBeacon(_firstLineBeacons, _firstLineInfo);
-            CheckBeacon(_secondLineBeacons, _secondLineInfo);
-            CheckBeacon(_helpBeacons, _helpLineInfo);
-        }
-
-        private void Update(DateTime actual_time) // проверить всемя последних сигналов от линий
-        {
-            _firstLineInfo.Update(actual_time);
-            _secondLineInfo.Update(actual_time);
-            _helpLineInfo.Update(actual_time);
-        }
-
-        public bool IsObsolete()
-        {
-            return false;
-            //  throw new NotImplementedException();
-        }
-
-        public void OnCompleted()
-        {
-            this.Unsubscribe();
-        }
-
-        public void OnError(Exception error)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnNext(Telemetry value)
-        {
-            ProduceEvent(value);
-        }
-
-        public virtual void Unsubscribe()
-        {
-            unsubscriber.Dispose();
-        }
-
-        public void Subscribe(IObservable<Telemetry> provider)
-        {
-            if (provider != null)
-                unsubscriber = provider.Subscribe(this);
+            }
+            else
+            {
+                _statusHolder = holder;
+            }
         }
         #endregion
+
+
+
+        private struct StatusHolder
+        {
+            public AppearStatus Status;
+            public DateTime Time;
+
+            internal static StatusHolder Empty => new StatusHolder { Status = AppearStatus.Unknown, Time = DateTime.MinValue };
+        }
     }
 }

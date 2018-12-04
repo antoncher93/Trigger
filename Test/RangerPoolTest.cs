@@ -68,8 +68,8 @@ namespace Trigger.Test
             };
 
             // Perform
-            ((Ranger)pool["test"]).ChangeStatus(AppearStatus.Outside);
-            ((Ranger)pool["test"]).ChangeStatus(AppearStatus.Inside);
+            //((Ranger)pool["test"]).ChangeStatus(AppearStatus.Outside);
+            //((Ranger)pool["test"]).ChangeStatus(AppearStatus.Inside);
 
             // Post-validate
             Assert.True(ok);

@@ -96,6 +96,18 @@ namespace Trigger.Beacons
             }
         }
 
+        public BeaconItem LastSignal
+        {
+            get
+            {
+                if (beacons.Count > 0)
+                {
+                    return beacons.OrderByDescending(b => b.LastSignal.Rssi).FirstOrDefault().LastSignal;
+                }
+                else return BeaconItem.Default;
+            }
+        }
+
         public double MaxAverRssi
         {
             get

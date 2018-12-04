@@ -52,7 +52,7 @@ namespace Trigger.Test
                         new BeaconItem { Rssi = -80, Time = DateTime.Now - TimeSpan.FromMinutes(3) }
                     }));
 
-            telemetry.CutBelow(time_to_cut);
+            //telemetry.CutBelow(time_to_cut);
 
             Assert.True(telemetry.Count==1);
 

@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using Trigger.Beacons;
+using Trigger.Interfaces;
 
 namespace Trigger.Classes
 {
-    public class PeackRangerBuilder
+    public class PeackRangerBuilder : IRangerBuilder
     {
         private PeakRanger ranger;
 
@@ -26,6 +27,6 @@ namespace Trigger.Classes
         public PeackRangerBuilder AddSecondLineBeacon(IBeaconBody beacon)
             => Modify(() => ranger._secondLineBeacons.Add(beacon));
 
-        public PeakRanger Build() => ranger;
+        public IRanger Build() => ranger;
     }
 }

@@ -11,6 +11,8 @@ namespace Trigger.Test
 {
     public class DataSource
     {
+        public const string SqlConnectionString = @"Data Source=192.168.0.9;Initial Catalog=Shoppercoin;Persist Security Info=True;User ID=ivg;Password=ivg";
+
 
         public static IEnumerable<object[]> GetTelemerty_10x6()
         {

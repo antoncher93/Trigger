@@ -67,8 +67,6 @@ namespace Trigger.Classes
 
             _userUid = accessible.UserId;
 
-            BeaconItem prevSignal = BeaconItem.Default;
-
             var data = accessible.SelectMany(beacon => beacon.Select(beaconItem => new { mac = beacon.Address, Item = beaconItem })).OrderBy(x => x.Item.Time);
 
             if (!data.Any())
