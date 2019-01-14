@@ -39,7 +39,7 @@ namespace Trigger.Classes.Signal
             _observers.Clear();
 
             _observers =
-                _items.SelectMany(t => t.Select(b => matcher.GetSpaceUid(Guid.Parse(b.Address)))).Distinct() // If beacon address is macAddress than b.Address only
+                _items.SelectMany(t => t.Select(b => matcher.GetSpaceUid(b.Address))).Distinct() // If beacon address is macAddress than b.Address only
                     .Select(spaceUid => getObserver(spaceUid))
                     .ToList();
 

@@ -20,6 +20,7 @@ namespace Trigger.Beacons
         public double BaseY { get; set; } = 0;
 
         public int RssiOffset { get; set; } = 5;
+        public int ActualSignalsCount { get; set; } = 1;
 
         public BeaconItem MaxSignal { get; private set; } = BeaconItem.Default;
         public BeaconItem LastSignal { get; private set; } = BeaconItem.Default;
@@ -28,7 +29,7 @@ namespace Trigger.Beacons
         {
             get
             {
-                if(_signals.Count>0)
+                if(_signals.Count >= ActualSignalsCount)
                 {
                     double summ = 0.0;
                     foreach (var s in _signals)
@@ -41,6 +42,8 @@ namespace Trigger.Beacons
                 return double.MinValue;
             }
         }
+
+        public double ValueToCompare { get; private set; }
 
         public double Distance => Calculator.BeaconDiastance(AverageRssi, TxPower);
 
@@ -65,11 +68,16 @@ namespace Trigger.Beacons
 
         public void Add(BeaconItem item)
         {
+            bool flag = true;
+            if(Math.Abs(item.Rssi - AverageRssi) >= 5)
+            {
+                ValueToCompare = item.Rssi;
+                flag = false;
+            }
+
             _rssi_to_set = item.Rssi.ToString();
 
             _signals.Add(item);
-
-            var f = MaxSignal.Equals(BeaconItem.Default);
 
             if (MaxSignal.Equals(BeaconItem.Default) || item.Rssi > MaxSignal.Rssi)
             {
@@ -80,6 +88,15 @@ namespace Trigger.Beacons
             {
                 LastSignal = item;
             }
+
+            if(flag)
+            {
+                ValueToCompare = AverageRssi;
+            }
+           
+
+
+
         }
 
         public void Update(DateTime actualTime)

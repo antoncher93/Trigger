@@ -38,6 +38,16 @@ namespace Trigger.Test
         {
             return new BeaconBody[] { };
         }
+
+        public int GetActualSignalCount()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int GetActualSignalPeriod()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class Dummy2RangerSettings : IRangerSettings
@@ -70,6 +80,16 @@ namespace Trigger.Test
         public IEnumerable<IBeaconBody> GetBeaconsBySpace(string accessPoint, BeaconLine line)
         {
             return new BeaconBody[] { };
+        }
+
+        public int GetActualSignalCount()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int GetActualSignalPeriod()
+        {
+            throw new NotImplementedException();
         }
     }
 }

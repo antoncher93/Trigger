@@ -5,10 +5,11 @@ using System.Text;
 using Trigger.Beacons;
 using Trigger.Signal;
 using Trigger.Classes;
+using Trigger.Interfaces;
 
 namespace Trigger.Rangers
 {
-    public abstract class TwoLineRanger : BaseRanger
+    public abstract class TwoLineRanger : BaseRanger , ITwoLineRanger
     {
         internal List<IBeaconBody> _firstLineBeacons { get; private set; } = new List<IBeaconBody>();
         internal List<IBeaconBody> _secondLineBeacons { get; private set; } = new List<IBeaconBody>();
@@ -17,15 +18,19 @@ namespace Trigger.Rangers
         protected BeaconInfoGroup _firstLineInfo = new BeaconInfoGroup();
         protected BeaconInfoGroup _secondLineInfo = new BeaconInfoGroup();
         protected BeaconInfoGroup _helpLineInfo = new BeaconInfoGroup();
+        protected RangerReport report = new RangerReport();
 
-        internal int _actualSignalPeriod = 1000;
+        internal int _actualSignalPeriod = 2000;
+        internal int _actualSignalCount = 1;
+
+        internal TimeSpan _timeStep = TimeSpan.FromMilliseconds(500);
 
         public override void OnNext(Telemetry value)
         {
             ProduceEvents(value);
         }
 
-        protected void RefreshBeaconInfoGroup(MacAddress macAddress, BeaconItem beacon)
+        protected void RefreshBeaconInfoGroup(MacAddress macAddress, BeaconItem signal)
         {
             bool flag = false;
 
@@ -47,7 +52,7 @@ namespace Trigger.Rangers
 
                         group.Add(res);
                     }
-                    res.Add(beacon);
+                    res.Add(signal);
                     return;
                 }
             };
@@ -56,6 +61,8 @@ namespace Trigger.Rangers
             CheckBeacon(_secondLineBeacons, _secondLineInfo);
             CheckBeacon(_helpBeacons, _helpLineInfo);
         }
+
+
 
         protected virtual void ProduceEvents(Telemetry telemetry)
         {
@@ -76,5 +83,7 @@ namespace Trigger.Rangers
             _secondLineInfo.Clear();
             _helpLineInfo.Clear();
         }
+
+        public override string Report => report.ToString();
     }
 }

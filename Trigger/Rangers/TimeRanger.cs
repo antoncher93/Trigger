@@ -9,6 +9,10 @@ namespace Trigger.Rangers
 {
     public class TimeRanger : TwoLineRanger
     {
+        private string _report = "";
+
+        public override string Report => _report;
+
         protected override void ProduceEvents(Telemetry telemetry)
         {
             base.ProduceEvents(telemetry);
@@ -44,18 +48,42 @@ namespace Trigger.Rangers
 
         private void CheckRssiPeacks()
         {
-            /// If some line does not have any last signal
-            if (_firstLineInfo.LastSignal.Equals(BeaconItem.Default) || _secondLineInfo.LastSignal.Equals(BeaconItem.Default))
-                return;
 
-            if ((_secondLineInfo.RssiPeak - _firstLineInfo.RssiPeak) >= TimeSpan.FromMilliseconds(500))
+
+            /// If some line does not have any last signal
+            if (_firstLineInfo.RssiPeak.Equals(BeaconItem.Default) || _secondLineInfo.RssiPeak.Equals(BeaconItem.Default))
             {
-                RaiseEvent(Enums.TriggerEventType.Enter, _secondLineInfo.RssiPeak.Time);
+                _report = "Some line does not have any Rssi Peak.";
+                return;
             }
-            else if (_firstLineInfo > _secondLineInfo)
+                
+
+
+            var peak1 = _firstLineInfo.RssiPeak;
+            var peak2 = _secondLineInfo.RssiPeak;
+            Enums.TriggerEventType activity = Enums.TriggerEventType.Enter;
+            DateTime time;
+
+            if ((peak2 - peak1) >= TimeSpan.FromMilliseconds(0))
             {
-                RaiseEvent(Enums.TriggerEventType.Exit, _secondLineInfo.RssiPeak.Time);
+                activity = Enums.TriggerEventType.Enter;
+                time = peak2.Time;
             }
+            else
+            {
+                activity = Enums.TriggerEventType.Enter;
+                time = peak1.Time;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append($"Peak 1 Rssi: {peak1.Rssi} {peak1.Time.TimeOfDay}");
+            sb.AppendLine();
+            sb.Append($"Peak 2 Rssi: {peak2.Rssi} {peak2.Time.TimeOfDay}");
+            sb.AppendLine();
+            sb.Append($"Result: {activity.ToString()}");
+            _report = sb.ToString();
+            RaiseEvent(activity, time);
+            
         }
     }
 }

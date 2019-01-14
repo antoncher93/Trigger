@@ -7,6 +7,8 @@ using System.Data.SqlClient;
 using Trigger.Signal;
 using Trigger.Classes;
 using Trigger;
+using Microsoft.Extensions.DependencyInjection;
+using RangerTest.Infrastructure;
 
 namespace RangerTest
 {
@@ -14,14 +16,25 @@ namespace RangerTest
     {
         const string SqlConnectionString = @"Data Source=192.168.0.9;Initial Catalog=Shoppercoin;Persist Security Info=True;User ID=ivg;Password=ivg";
 
+        static void ConfigureServices(IServiceCollection serviceCollection)
+        {
+            serviceCollection
+                .AddLogging()
+                .AddSingleton<IRangerSettings, BaseRangerSettings>()
+                .AddSingleton<ITwoLineRangerBuilder, RangerBuilder>()
+                .AddScoped<IRepository<Telemetry>, SqlDataTelemetryRepository>()
+                .AddSingleton<IRangerPool, RangerPool>();
+        }
+
         static void Main(string[] args)
         {
-            IRanger ranger = new TimeRangerBuilder()
-               .AddFirstLineBeacon(BeaconBody.FromUUID(new Guid("ebefd083-70a2-47c8-9837-e7b5634df525")))
-               .AddSecondLineBeacon(BeaconBody.FromUUID(new Guid("ebefd083-70a2-47c8-9837-e7b5634df599")))
-               .Build();
+            var serviceCollection = new ServiceCollection();
+            ConfigureServices(serviceCollection);
+            var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            ranger.OnEvent += (s, e) =>
+            var rangerPool = serviceProvider.GetRequiredService<IRangerPool>();
+
+            rangerPool.OnEvent += (s, e) =>
             {
                 Console.WriteLine(e.Type + " " + e.Timespan);
 
@@ -37,49 +50,25 @@ namespace RangerTest
 
             Console.WriteLine("Hello World!");
 
-            var con = ConnectToDB();
-            var strs = GetStringsFromSqlConnection(con);
+            var telemRepos = serviceProvider.GetRequiredService<IRepository<Telemetry>>();
 
-            foreach(var s in strs)
+            foreach (var telemetry in telemRepos.GetItems())
             {
-                var telemetry = Newtonsoft.Json.JsonConvert.DeserializeObject<Telemetry>(s, new TelemetryJsonConverter());
-
                 Console.WriteLine(telemetry.Protocol);
 
+                var ranger = rangerPool["Nike"];
+
                 ranger.OnNext(telemetry);
+
+                Console.WriteLine();
+                Console.WriteLine(ranger.Report);
             }
 
-
+            telemRepos.Dispose();
 
             Console.ReadKey();
         }
 
-        static SqlConnection ConnectToDB()
-        {
-            var result = new List<string>();
-
-            SqlConnection conn = new SqlConnection(SqlConnectionString);
-
-            conn.Open();
-
-            return conn;
-        }
-
-        static ICollection<string> GetStringsFromSqlConnection(SqlConnection openedCon)
-        {
-            var result = new List<string>();
-            if(openedCon?.State == System.Data.ConnectionState.Open)
-            {
-                var reader = new SqlCommand("select Data from signal", openedCon).ExecuteReader();
-                if (reader.HasRows)
-                {
-                    while (reader.Read())
-                    {
-                        result.Add(reader.GetString(0));
-                    }
-                }
-            }
-            return result;
-        }
+       
     }
 }

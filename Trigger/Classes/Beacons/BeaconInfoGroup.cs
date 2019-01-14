@@ -82,7 +82,19 @@ namespace Trigger.Beacons
             foundbeacon.Add(beacon);
         }
 
-        public double ValueToCompare => MaxAverRssi;
+        public double ValueToCompare => FiltredSignal;
+
+        public double FiltredSignal
+        {
+            get
+            {
+                if(beacons.Count > 0)
+                {
+                    return beacons.OrderByDescending(b => b.ValueToCompare).FirstOrDefault().ValueToCompare;
+                }
+                else return double.MinValue;
+            }
+        }
 
         public BeaconItem RssiPeak
         {
@@ -116,7 +128,7 @@ namespace Trigger.Beacons
                 {
                     return beacons.OrderByDescending(b => b.AverageRssi).FirstOrDefault().AverageRssi;
                 }
-                else return -200;
+                else return double.MinValue;
             }
         }
 

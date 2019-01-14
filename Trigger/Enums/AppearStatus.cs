@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Trigger
 {
-    enum AppearStatus
+    public enum AppearStatus
     {
         Inside = 1,
         Outside = 0,

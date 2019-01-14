@@ -10,5 +10,7 @@ namespace Trigger.Interfaces
         bool IsObsolete();
 
         void Subscribe(IObservable<Telemetry> provider);
+
+        string Report { get; }
     }
 }

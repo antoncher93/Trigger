@@ -47,6 +47,8 @@ namespace Trigger
             });
         }
 
+        public virtual string Report => string.Empty;
+
         
     }
 }

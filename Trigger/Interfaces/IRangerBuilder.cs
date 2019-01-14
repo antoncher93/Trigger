@@ -4,8 +4,8 @@ using System.Text;
 
 namespace Trigger.Interfaces
 {
-    public interface IRangerBuilder
+    public interface IRangerBuilder<T> where T : IRanger
     {
-        IRanger Build();
+        T Build();
     }
 }

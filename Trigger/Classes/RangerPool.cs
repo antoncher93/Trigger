@@ -16,10 +16,12 @@ namespace Trigger.Classes
         ConcurrentDictionary<string, IRanger>
         , IRangerPool
     {
+        private readonly ITwoLineRangerBuilder _twoLineRangerBuilder;
         private readonly IRangerSettings _rangerSettings = null;
 
-        public RangerPool(IRangerSettings rangerSettings)
+        public RangerPool(ITwoLineRangerBuilder twoLineRangerBuilder , IRangerSettings rangerSettings)
         {
+            _twoLineRangerBuilder = twoLineRangerBuilder;
             _rangerSettings = rangerSettings;
         }
 
@@ -31,10 +33,9 @@ namespace Trigger.Classes
                     return null;
 
                 return GetOrAdd(key, (k) =>
-                  {
-                      RangerBuilder builder = new RangerBuilder();
+                  {                      
                       //   .SetLogger(_rangerSettings.GetLogger());
-                      builder.SetSpaceUid(key);
+                      _twoLineRangerBuilder.SetSpaceUid(key);
                       Action<BeaconLine, Action<IBeaconBody>> fillLine = (type, action) =>
                       {
                           IEnumerable<IBeaconBody> beacons = _rangerSettings.GetBeaconsBySpace(key, type);
@@ -43,11 +44,14 @@ namespace Trigger.Classes
                                   action(b);
                       };
 
-                      fillLine(BeaconLine.First, (b) => { builder.AddFirstLineBeacon(b); });
-                      fillLine(BeaconLine.Second, (b) => { builder.AddSecondLineBeacon(b); });
-                      fillLine(BeaconLine.Help, (b) => { builder.AddHelpBeacon(b); });
+                      fillLine(BeaconLine.First, (b) => { _twoLineRangerBuilder.AddFirstLineBeacon(b); });
+                      fillLine(BeaconLine.Second, (b) => { _twoLineRangerBuilder.AddSecondLineBeacon(b); });
+                      fillLine(BeaconLine.Help, (b) => { _twoLineRangerBuilder.AddHelpBeacon(b); });
 
-                      IRanger result = builder.Build();
+                      _twoLineRangerBuilder.SetActualSignalCount(_rangerSettings.GetActualSignalCount());
+                      _twoLineRangerBuilder.SetActualSignalPeriod(_rangerSettings.GetActualSignalPeriod());
+
+                      IRanger result = _twoLineRangerBuilder.Build();
 
                       result.OnEvent += OnEvent;
 

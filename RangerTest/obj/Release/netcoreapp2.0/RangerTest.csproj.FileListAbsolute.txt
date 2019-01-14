@@ -1,0 +1,13 @@
+C:\Users\Anton\source\repos\Trigger\RangerTest\bin\Release\netcoreapp2.0\RangerTest.deps.json
+C:\Users\Anton\source\repos\Trigger\RangerTest\bin\Release\netcoreapp2.0\RangerTest.runtimeconfig.json
+C:\Users\Anton\source\repos\Trigger\RangerTest\bin\Release\netcoreapp2.0\RangerTest.runtimeconfig.dev.json
+C:\Users\Anton\source\repos\Trigger\RangerTest\bin\Release\netcoreapp2.0\RangerTest.dll
+C:\Users\Anton\source\repos\Trigger\RangerTest\bin\Release\netcoreapp2.0\RangerTest.pdb
+C:\Users\Anton\source\repos\Trigger\RangerTest\bin\Release\netcoreapp2.0\Trigger.dll
+C:\Users\Anton\source\repos\Trigger\RangerTest\bin\Release\netcoreapp2.0\Trigger.pdb
+C:\Users\Anton\source\repos\Trigger\RangerTest\obj\Release\netcoreapp2.0\RangerTest.csprojResolveAssemblyReference.cache
+C:\Users\Anton\source\repos\Trigger\RangerTest\obj\Release\netcoreapp2.0\RangerTest.csproj.CoreCompileInputs.cache
+C:\Users\Anton\source\repos\Trigger\RangerTest\obj\Release\netcoreapp2.0\RangerTest.AssemblyInfoInputs.cache
+C:\Users\Anton\source\repos\Trigger\RangerTest\obj\Release\netcoreapp2.0\RangerTest.AssemblyInfo.cs
+C:\Users\Anton\source\repos\Trigger\RangerTest\obj\Release\netcoreapp2.0\RangerTest.dll
+C:\Users\Anton\source\repos\Trigger\RangerTest\obj\Release\netcoreapp2.0\RangerTest.pdb

@@ -4,7 +4,7 @@ namespace Trigger.Beacons
 {
     public struct BeaconItem
     {
-        public int Rssi { get; set; }
+        public double Rssi { get; set; }
         public DateTime Time { get; set; }
 
         public static BeaconItem Default

@@ -5,16 +5,16 @@ using Trigger.Interfaces;
 
 namespace Trigger.Rangers
 {
-    public abstract class BaseRangerBuilder : IRangerBuilder
+    public abstract class BaseRangerBuilder<T> : IRangerBuilder<T> where T : IRanger
     {
-        protected IRanger ranger;
+        protected T ranger;
 
-        protected IRangerBuilder Modify(Action act)
-        {
+        protected IRangerBuilder<T> Modify(Action act)
+        {            
             act?.Invoke();
             return this;
         }
 
-        public IRanger Build() => ranger;
+        public T Build() => ranger;
     }
 }

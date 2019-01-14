@@ -138,6 +138,11 @@ namespace Trigger.Signal
             return JsonConvert.DeserializeObject<Telemetry>(s, new TelemetryJsonConverter());
         }
 
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this, new TelemetryJsonConverter());
+        }
+
         public string Protocol
         {
             get
